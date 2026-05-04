@@ -1,0 +1,15 @@
+{
+  "name": "warden",
+  "description": "Senior coding standards as Engineering Tenets, auto-loaded into every Claude Code session.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Christoph Höller",
+    "email": "c.m.hoeller@outlook.com"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/c-hoeller/agent-plugins",
+  "repository": "https://github.com/c-hoeller/agent-plugins",
+  "keywords": ["coding-standards", "tenets", "anti-patterns", "best-practices"],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json"
+}

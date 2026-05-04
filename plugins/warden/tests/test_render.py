@@ -1,0 +1,140 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from lib import warden_lib
+
+
+def test_render_index_lists_each_tenet(make_tenet, tenets_dir: Path):
+    make_tenet(id="ET-0001", slug="a", title="First", tags=["testing", "oop"])
+    make_tenet(id="ET-0002", slug="b", title="Second", tier=2, severity="low")
+    tenets = warden_lib.load_all(tenets_dir)
+    out = warden_lib.render_index(tenets)
+    assert "ET-0001" in out
+    assert "ET-0002" in out
+    assert "tags: [testing, oop]" in out
+    assert "tags: []" in out  # second tenet has empty tags
+
+
+def test_render_index_is_sorted_by_id(make_tenet, tenets_dir: Path):
+    make_tenet(id="ET-0002", slug="b", title="Second")
+    make_tenet(id="ET-0001", slug="a", title="First")
+    tenets = warden_lib.load_all(tenets_dir)
+    out = warden_lib.render_index(tenets)
+    pos_first = out.index("ET-0001")
+    pos_second = out.index("ET-0002")
+    assert pos_first < pos_second
+
+
+def test_render_charter_lists_tier1_tenets_only_in_tier1_section(make_tenet, tenets_dir: Path):
+    make_tenet(id="ET-0001", slug="a", tier=1, title="Tier1 tenet")
+    make_tenet(id="ET-0002", slug="b", tier=2, title="Tier2 tenet")
+    tenets = warden_lib.load_all(tenets_dir)
+    out = warden_lib.render_charter(tenets)
+
+    tier1_section = out.split("## Tier 1")[1].split("## Tier 2")[0]
+    assert "ET-0001" in tier1_section
+    assert "Tier1 tenet" in tier1_section
+    assert "ET-0002" not in tier1_section
+    # Tier 2 is mentioned but only by count, not by individual tenets — the
+    # charter delegates Tier 2 to the auto-loaded skills + lookup-tenet.
+    assert "Tier 2" in out
+
+
+def test_render_charter_references_full_skill_names(make_tenet, tenets_dir: Path):
+    # Charter must point at the actual skill directory name so a user can
+    # `cat skills/<name>/SKILL.md` directly without guessing.
+    make_tenet(id="ET-0001", slug="my-tenet-here", tier=1)
+    tenets = warden_lib.load_all(tenets_dir)
+    out = warden_lib.render_charter(tenets)
+    assert "skill `et-0001-my-tenet-here`" in out
+
+
+def test_render_charter_includes_protocol_block(make_tenet, tenets_dir: Path):
+    make_tenet(id="ET-0001", slug="a", tier=1)
+    tenets = warden_lib.load_all(tenets_dir)
+    out = warden_lib.render_charter(tenets)
+    assert "## Protocol" in out
+    assert "lookup-tenet" in out
+    assert "cite the tenet id" in out.lower()
+
+
+def test_render_charter_size_stays_small_for_25_tenets(make_tenet, tenets_dir: Path):
+    # Architectural property: the always-on charter must fit comfortably
+    # under Claude Code's 10_000-character SessionStart additionalContext
+    # limit even with a large catalog. This test asserts the headline-only
+    # design holds at scale.
+    for i in range(1, 26):
+        make_tenet(id=f"ET-{i:04d}", slug=f"slug-{i}", tier=1)
+    tenets = warden_lib.load_all(tenets_dir)
+    out = warden_lib.render_charter(tenets)
+    assert len(out) < 5_000, f"charter unexpectedly large: {len(out)} chars"
+
+
+def test_render_skill_for_tenet_has_minimal_frontmatter(make_tenet, tenets_dir: Path):
+    make_tenet(
+        id="ET-0001",
+        slug="my-tenet",
+        title="My tenet",
+        triggers=["touching auth code", "writing a login flow"],
+    )
+    tenets = warden_lib.load_all(tenets_dir)
+    skill_name, content = warden_lib.render_skill_for_tenet(tenets[0])
+
+    assert skill_name == "et-0001-my-tenet"
+    assert content.startswith("---\n")
+    assert f"name: {skill_name}" in content
+    # `description` MUST start with "Use when ..." — that is what the Claude
+    # Code Skill tool keys off for auto-invocation. Don't relax this test
+    # without re-validating that auto-load still works.
+    assert "description: Use when touching auth code; writing a login flow." in content
+    # Tenet ID and title must NOT appear in the description — they belong in
+    # the skill body. Workflow/identity material in the description risks
+    # Claude treating it as a shortcut and skipping the body.
+    assert "Tenet ET-0001" not in content.split("---", 2)[1]
+    assert "My tenet." not in content.split("---", 2)[1]
+
+
+def test_render_skill_for_tenet_body_contains_all_required_sections(make_tenet, tenets_dir: Path):
+    make_tenet(id="ET-0001", slug="a")
+    tenets = warden_lib.load_all(tenets_dir)
+    _, content = warden_lib.render_skill_for_tenet(tenets[0])
+    for section in warden_lib.REQUIRED_SECTIONS:
+        assert f"## {section}" in content
+
+
+def test_render_skill_description_truncates_at_hard_cap(make_tenet, tenets_dir: Path):
+    long_trigger = "x" * 195  # under per-trigger 200 cap, but enough to bust the total
+    make_tenet(triggers=[long_trigger] * 10)
+    tenets = warden_lib.load_all(tenets_dir)
+    _, content = warden_lib.render_skill_for_tenet(tenets[0])
+    description_line = next(
+        line for line in content.splitlines() if line.startswith("description: ")
+    )
+    description = description_line[len("description: ") :]
+    assert len(description) <= warden_lib.SKILL_DESCRIPTION_MAX_CHARS
+
+
+def test_hook_payload_is_valid_session_start_json(make_tenet, tenets_dir: Path):
+    make_tenet(id="ET-0001", slug="a", tier=1, title="Tier1 tenet")
+    tenets = warden_lib.load_all(tenets_dir)
+    rendered = warden_lib.render_charter(tenets)
+    payload = warden_lib.render_tier1_hook_payload(rendered)
+
+    parsed = json.loads(payload)
+    assert parsed["hookSpecificOutput"]["hookEventName"] == "SessionStart"
+    assert parsed["hookSpecificOutput"]["additionalContext"] == rendered
+    assert "Tier1 tenet" in parsed["hookSpecificOutput"]["additionalContext"]
+
+
+def test_hook_payload_escapes_special_characters(make_tenet, tenets_dir: Path):
+    # Quotes, backslashes and newlines in tenet content must survive a JSON
+    # round-trip — this is exactly the case the shell hook cannot handle, and
+    # the reason the payload is pre-built at build time. We exercise the
+    # round-trip via an arbitrary string rather than a tenet field, since the
+    # charter no longer embeds tenet body prose.
+    raw = 'Use "double quotes" and a \\backslash and\nnewlines.'
+    payload = warden_lib.render_tier1_hook_payload(raw)
+    parsed = json.loads(payload)
+    assert parsed["hookSpecificOutput"]["additionalContext"] == raw

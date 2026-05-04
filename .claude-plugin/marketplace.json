@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "claude-plugins",
+  "description": "Plugins that bring senior engineering discipline and automation to Claude Code.",
+  "owner": {
+    "name": "Christoph Höller",
+    "email": "c.m.hoeller@outlook.com"
+  },
+  "metadata": {
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "warden",
+      "source": "warden",
+      "description": "Senior coding standards as Engineering Tenets, auto-loaded into every Claude Code session.",
+      "version": "0.1.0"
+    }
+  ]
+}

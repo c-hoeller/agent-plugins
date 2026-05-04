@@ -1,0 +1,121 @@
+[project]
+name = "warden-build"
+version = "0.1.0"
+description = "Build and validation tooling for the Warden Engineering Tenets plugin."
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pyyaml>=6.0.3",
+    "pytest>=9.0",
+    "ruff>=0.15",
+    "mypy>=1.20",
+    "types-pyyaml>=6.0.12",
+    "poethepoet>=0.45",
+]
+
+# ---------------------------------------------------------------------------
+# pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["scripts"]
+
+# ---------------------------------------------------------------------------
+# Ruff — formatter + linter
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["build/", ".venv/"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "B",   # flake8-bugbear
+    "I",   # isort
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "SIM", # flake8-simplify
+    "RET", # flake8-return
+]
+ignore = [
+    "E501",  # line too long — formatter handles it; long URLs / data lines OK
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["N802", "N803"]  # snake_case is enforced; allow loose names in tests
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ---------------------------------------------------------------------------
+# MyPy — strict type checking
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.10"
+strict = true
+mypy_path = ["scripts"]
+exclude = ["build/", "\\.venv/"]
+
+# Tests don't need full strictness — pytest fixtures use Python's natural
+# duck-typing, and adding return-type annotations to every test function
+# is busywork that doesn't catch real bugs.
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+# ---------------------------------------------------------------------------
+# poethepoet — task runner (Make replacement, cross-platform via Python)
+# Run any task with `uv run poe <task>`.
+# ---------------------------------------------------------------------------
+[tool.poe.tasks.validate]
+help = "Validate every tenet against the spec"
+cmd = "python scripts/validate.py"
+
+[tool.poe.tasks.build]
+help = "Validate and regenerate build/tier1-bundle.md and build/index.md"
+cmd = "python scripts/build.py"
+
+[tool.poe.tasks.build-check]
+help = "Verify that build/ and skills/et-*/ are up to date with tenets/ (CI gate)"
+cmd = "python scripts/build_check.py"
+
+[tool.poe.tasks.test]
+help = "Run the pytest suite"
+cmd = "pytest"
+
+[tool.poe.tasks.lint]
+help = "Run ruff lint checks (no auto-fix)"
+cmd = "ruff check ."
+
+[tool.poe.tasks.fix]
+help = "Auto-fix ruff lint issues"
+cmd = "ruff check --fix ."
+
+[tool.poe.tasks.format]
+help = "Format the codebase with ruff"
+cmd = "ruff format ."
+
+[tool.poe.tasks.format-check]
+help = "Verify formatting without writing changes"
+cmd = "ruff format --check ."
+
+[tool.poe.tasks.typecheck]
+help = "Run mypy in strict mode"
+cmd = "mypy ."
+
+# Aggregate tasks. `poe check` is the local pre-commit gate; `poe ci` is
+# what CI runs (no auto-formatting).
+[tool.poe.tasks.check]
+help = "Format, lint, type-check, validate, build, and test (local dev)"
+sequence = ["format", "lint", "typecheck", "validate", "build", "test"]
+
+[tool.poe.tasks.ci]
+help = "Verify formatting + run all checks without modifying files (CI)"
+sequence = ["format-check", "lint", "typecheck", "validate", "build-check", "test"]
