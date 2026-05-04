@@ -54,6 +54,17 @@ REQUIRED_FRONTMATTER: tuple[str, ...] = (
 # extra char per skill multiplies across the whole catalog.
 SKILL_DESCRIPTION_MAX_CHARS = 1400
 
+# Combined budget for the descriptions of *all* unscoped tenet skills (i.e.
+# tenets without `paths:`, which therefore stay in the global match pool
+# regardless of the active file). Claude Code's auto-load mechanism
+# considers all unscoped skill descriptions on every prompt; if their sum
+# grows too large, the description budget for non-Warden skills shrinks
+# and auto-load reliability drops. The budget is conservative so that the
+# catalog can grow to ~25-30 unscoped tenets before the test fails — at
+# which point the fix is to scope older tenets via `paths:`, not to raise
+# this limit. Tier 2 tenets MUST set `paths:` and so do not count here.
+UNSCOPED_DESCRIPTION_BUDGET_CHARS = 7000
+
 
 class WardenError(Exception):
     """Raised by parsers; aggregated by validate()."""
@@ -446,6 +457,19 @@ def _build_skill_description(tenet: Tenet) -> str:
         # chars, so reaching this should be rare.
         description = description[: SKILL_DESCRIPTION_MAX_CHARS - 1].rstrip() + "…"
     return description
+
+
+def unscoped_description_usage(tenets: Iterable[Tenet]) -> tuple[int, list[tuple[str, int]]]:
+    """Return (total_chars, per_tenet_breakdown) for tenets without `paths:`.
+
+    Only unscoped tenets compete in the global description-match pool on every
+    prompt; tenets with `paths:` are gated by file-glob and don't count here.
+    The breakdown is sorted descending so the largest contributors surface
+    first when a budget violation is reported.
+    """
+    breakdown = [(t.id, len(_build_skill_description(t))) for t in tenets if not t.paths]
+    breakdown.sort(key=lambda pair: pair[1], reverse=True)
+    return sum(chars for _, chars in breakdown), breakdown
 
 
 def render_skill_for_tenet(tenet: Tenet) -> tuple[str, str]:

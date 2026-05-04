@@ -116,6 +116,57 @@ def test_render_skill_description_truncates_at_hard_cap(make_tenet, tenets_dir: 
     assert len(description) <= warden_lib.SKILL_DESCRIPTION_MAX_CHARS
 
 
+def test_unscoped_description_usage_excludes_paths_scoped_tenets(make_tenet, tenets_dir: Path):
+    # `paths:`-scoped tenets are gated by file-glob and don't compete in the
+    # global description-match pool, so they must not count toward the
+    # unscoped budget.
+    make_tenet(id="ET-0001", slug="unscoped", triggers=["doing the unscoped thing"])
+    make_tenet(
+        id="ET-0002",
+        slug="scoped",
+        triggers=["doing the scoped thing in TS"],
+        applies_to={"language": "TypeScript"},
+    )
+    # The make_tenet fixture doesn't expose `paths` directly; inject it.
+    scoped_path = tenets_dir / "ET-0002-scoped.md"
+    scoped_path.write_text(
+        scoped_path.read_text(encoding="utf-8").replace(
+            "triggers:", 'paths:\n  - "**/*.ts"\ntriggers:', 1
+        ),
+        encoding="utf-8",
+    )
+    tenets = warden_lib.load_all(tenets_dir)
+    total, breakdown = warden_lib.unscoped_description_usage(tenets)
+    ids = [tid for tid, _ in breakdown]
+    assert ids == ["ET-0001"], f"only ET-0001 should be unscoped, got {ids}"
+    assert total == len(warden_lib._build_skill_description(tenets[0]))
+
+
+def test_real_catalog_unscoped_description_usage_under_budget():
+    """Drift detector for the live catalog.
+
+    Sums the descriptions of every committed tenet without `paths:` and
+    fails if their total exceeds the budget. Failure mode: a future tenet
+    addition (or a trigger-list expansion) silently eats into the global
+    description-match budget; this test surfaces it before the next push.
+
+    Fix when this fails: scope the largest contributors via `paths:`, or
+    shorten their trigger lists. Do NOT raise the budget — the cap exists
+    so non-Warden skills keep room in the shared pool.
+    """
+    plugin_root = Path(__file__).resolve().parent.parent
+    tenets = warden_lib.load_all(plugin_root / "tenets")
+    total, breakdown = warden_lib.unscoped_description_usage(tenets)
+    if total > warden_lib.UNSCOPED_DESCRIPTION_BUDGET_CHARS:
+        top = "\n".join(f"    {tid}: {chars} chars" for tid, chars in breakdown[:5])
+        raise AssertionError(
+            f"unscoped tenet description total {total} chars exceeds budget "
+            f"{warden_lib.UNSCOPED_DESCRIPTION_BUDGET_CHARS}.\n"
+            f"  top contributors:\n{top}\n"
+            f"  fix: scope these via `paths:` or shorten their triggers."
+        )
+
+
 def test_hook_payload_is_valid_session_start_json(make_tenet, tenets_dir: Path):
     make_tenet(id="ET-0001", slug="a", tier=1, title="Tier1 tenet")
     tenets = warden_lib.load_all(tenets_dir)
