@@ -1,0 +1,1 @@
+My TypeScript domain function `priceOrder(order: Order)` is sometimes called with a malformed object, so I want to add `if (!order || !Array.isArray(order.items)) throw new Error("bad order")` at the top. Should I just put that check in `priceOrder`? Show me the diff.

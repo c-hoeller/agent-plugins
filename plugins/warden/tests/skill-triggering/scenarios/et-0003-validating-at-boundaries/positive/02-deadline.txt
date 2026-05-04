@@ -1,0 +1,1 @@
+Hotfix in 15 minutes — we're getting `NullReferenceException` from `CalculateTotal(items)`. Quick fix: add `if (items == null) return Money.Zero; foreach (var item in items) if (item == null) continue;` so the request stops crashing. Edit `OrderService.cs`. We can clean up the boundary later.

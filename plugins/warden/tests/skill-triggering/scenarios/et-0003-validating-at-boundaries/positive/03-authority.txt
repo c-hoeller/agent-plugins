@@ -1,0 +1,1 @@
+Our security architect said every Python function in the billing module needs defense in depth — re-validate every argument, even when it has a type hint. The `send_welcome(email: EmailAddress, name: str)` function should re-check that `email` is a valid email and `name` is non-empty. Update it accordingly.
