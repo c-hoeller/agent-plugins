@@ -53,7 +53,6 @@ REQUIRED_FRONTMATTER: tuple[str, ...] = (
 # description budget when many tenets are active. Raise cautiously — every
 # extra char per skill multiplies across the whole catalog.
 SKILL_DESCRIPTION_MAX_CHARS = 1400
-SKILL_NAME_MAX_CHARS = 64
 
 
 class WardenError(Exception):
@@ -191,33 +190,23 @@ def load_all(tenets_dir: Path) -> list[Tenet]:
 
 
 def _check_applies_to(value: Any) -> str | None:
+    """Two canonical forms: the string `"any"`, or a single-key mapping
+    `{language: <name>}` / `{framework: <name>}`. Multi-language tenets
+    should scope via `paths:` globs, not via list-form applies-to.
+    """
     if value == "any":
         return None
-    if isinstance(value, str):
-        if ":" not in value:
-            return f"applies-to string must be 'any' or '<key>: <name>', got {value!r}"
-        key, _, name = value.partition(":")
-        if key.strip() not in APPLIES_TO_KEYS:
-            return f"applies-to key must be one of {APPLIES_TO_KEYS}, got {key.strip()!r}"
-        if not name.strip():
-            return "applies-to value missing name after ':'"
-        return None
-    if isinstance(value, dict):
-        if len(value) != 1:
-            return "applies-to dict must have exactly one key"
+    if isinstance(value, dict) and len(value) == 1:
         (key,) = value.keys()
         if key not in APPLIES_TO_KEYS:
             return f"applies-to key must be one of {APPLIES_TO_KEYS}, got {key!r}"
+        if not str(value[key]).strip():
+            return f"applies-to value for {key!r} must be non-empty"
         return None
-    if isinstance(value, list):
-        if not value:
-            return "applies-to list must not be empty"
-        for entry in value:
-            err = _check_applies_to(entry)
-            if err:
-                return f"applies-to list entry: {err}"
-        return None
-    return f"applies-to has unsupported type {type(value).__name__}"
+    return (
+        "applies-to must be either 'any' or a single-key mapping "
+        f"{{{'/'.join(APPLIES_TO_KEYS)}: <name>}}, got {value!r}"
+    )
 
 
 def validate(tenets: Iterable[Tenet]) -> list[WardenError]:
@@ -319,35 +308,29 @@ def validate(tenets: Iterable[Tenet]) -> list[WardenError]:
                 errors.append(WardenError(t.path, f"related references self: {rel}"))
             elif rel not in all_ids:
                 errors.append(WardenError(t.path, f"related reference {rel!r} not found"))
-        # Required sections present and ordered (parse_sections preserves order)
-        section_order = list(t.sections.keys())
+        # Required sections present. Section order is documented in the
+        # template and obvious to any human reading the file; enforcing it
+        # via validation caught nothing real and complicated edits.
         for required in REQUIRED_SECTIONS:
             if required not in t.sections:
                 errors.append(WardenError(t.path, f"missing required section: ## {required}"))
-        present_required = [s for s in section_order if s in REQUIRED_SECTIONS]
-        if present_required != [s for s in REQUIRED_SECTIONS if s in section_order]:
-            errors.append(
-                WardenError(
-                    t.path,
-                    "required sections must appear in order "
-                    f"{REQUIRED_SECTIONS}, got {tuple(section_order)}",
-                )
-            )
 
     return errors
 
 
 def _format_applies_to(value: Any) -> str:
-    """Render applies-to compactly for the index line."""
+    """Render applies-to compactly for the index line.
+
+    Validation runs before this and rejects every shape outside the two
+    canonical forms, so the final raise is unreachable at runtime — it is
+    only there to satisfy mypy strict on the function's return contract.
+    """
     if value == "any":
         return "any"
-    if isinstance(value, str):
-        return value.strip()
-    if isinstance(value, dict):
+    if isinstance(value, dict) and len(value) == 1:
         ((k, v),) = value.items()
         return f"{k}:{v}"
-    if isinstance(value, list):
-        return "+".join(_format_applies_to(e) for e in value)
+    raise ValueError(f"unreachable: validate() should have rejected {value!r}")
     return str(value)
 
 
@@ -438,8 +421,7 @@ def _skill_name_for(tenet: Tenet) -> str:
     # Filename format is enforced as ET-NNNN-<slug>.md by validation, so the
     # third split chunk is always the slug.
     slug = tenet.path.stem.split("-", 2)[-1]
-    name = f"et-{tenet.id[3:].lower()}-{slug}"
-    return name[:SKILL_NAME_MAX_CHARS]
+    return f"et-{tenet.id[3:].lower()}-{slug}"
 
 
 def _build_skill_description(tenet: Tenet) -> str:

@@ -52,13 +52,29 @@ def test_invalid_semver_in_since_is_flagged(make_tenet, tenets_dir: Path):
     assert any("SemVer" in e.message for e in errors)
 
 
-def test_applies_to_string_form_valid(make_tenet, tenets_dir: Path):
-    make_tenet(applies_to="language: typescript")
+def test_applies_to_mapping_form_valid(make_tenet, tenets_dir: Path):
+    make_tenet(applies_to={"language": "TypeScript"})
     assert _validate(tenets_dir) == []
 
 
+def test_applies_to_string_other_than_any_is_flagged(make_tenet, tenets_dir: Path):
+    # Only "any" is a valid string form; "language: TS" colon-strings used to
+    # be accepted but were dropped — mapping form is the canonical alternative.
+    make_tenet(applies_to="language: typescript")
+    errors = _validate(tenets_dir)
+    assert any("applies-to" in e.message for e in errors)
+
+
 def test_applies_to_invalid_key(make_tenet, tenets_dir: Path):
-    make_tenet(applies_to="weird: ts")
+    make_tenet(applies_to={"weird": "ts"})
+    errors = _validate(tenets_dir)
+    assert any("applies-to" in e.message for e in errors)
+
+
+def test_applies_to_list_form_is_flagged(make_tenet, tenets_dir: Path):
+    # List form is intentionally no longer supported — multi-language tenets
+    # should scope via `paths:` globs instead.
+    make_tenet(applies_to=[{"language": "TypeScript"}, {"language": "JavaScript"}])
     errors = _validate(tenets_dir)
     assert any("applies-to" in e.message for e in errors)
 
@@ -100,24 +116,3 @@ def test_missing_section_is_flagged(make_tenet, tenets_dir: Path):
     p.write_text(text, encoding="utf-8")
     errors = _validate(tenets_dir)
     assert any("missing required section" in e.message for e in errors)
-
-
-def test_section_order_is_enforced(make_tenet, tenets_dir: Path):
-    p = make_tenet()
-    text = p.read_text()
-    # Swap "Why" and "Rule" sections to violate order.
-    text = text.replace(
-        "## Rule\n\nDo the right thing.",
-        "## Swap-Marker\n\nDo the right thing.",
-    )
-    text = text.replace(
-        "## Why\n\nBecause it's right.",
-        "## Rule\n\nDo the right thing.",
-    )
-    text = text.replace(
-        "## Swap-Marker\n\nDo the right thing.",
-        "## Why\n\nBecause it's right.",
-    )
-    p.write_text(text, encoding="utf-8")
-    errors = _validate(tenets_dir)
-    assert any("sections must appear in order" in e.message for e in errors)
