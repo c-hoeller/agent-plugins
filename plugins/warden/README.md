@@ -11,6 +11,9 @@ its own **auto-loadable skill** that triggers when its description
 matches the work the agent is doing. The full catalog is also
 browsable on demand via the `lookup-tenet` skill.
 
+> Working on Warden itself? See [CONTRIBUTING.md](CONTRIBUTING.md) for
+> the build pipeline, dev tooling, and CI gate.
+
 ## What's an Engineering Tenet?
 
 An **Engineering Tenet** (`ET-NNNN`) is a structured record of one
@@ -44,46 +47,45 @@ relevant.
 
 **Tier 1** = universal, high-severity. Listed in the Charter index.
 **Tier 2** = language- or framework-specific. Not listed in the
-Charter; auto-loads via skill triggers when relevant code is touched.
+Charter; auto-loads via skill triggers (and `paths:` globs) when
+relevant code is touched.
+
+The `SessionStart` hook ([`hooks/inject-charter.cmd`](hooks/inject-charter.cmd))
+is a polyglot Windows-`.cmd` / POSIX-shell script — the same file
+runs as a batch script under `cmd.exe` and as a shell script under
+`/bin/sh`. **No external runtime dependency is required**: only
+POSIX `sh` + `cat` (Unix) and `cmd.exe` + `type` (Windows), both of
+which are part of every base system. JSON escaping is done at build
+time, so no shell-side escaping ever runs.
 
 ## Repository layout
 
 ```text
 plugins/warden/
 ├── .claude-plugin/plugin.json    # Claude Code plugin manifest
-├── hooks/
-│   ├── hooks.json                # SessionStart hook registration
-│   └── inject-charter.cmd        # polyglot cmd+sh hook, emits charter.json
+├── hooks/                        # SessionStart hook + registration
 ├── skills/
-│   ├── using-warden/SKILL.md     # hand-authored: re-bootstraps Warden's contract mid-session
-│   ├── lookup-tenet/SKILL.md     # hand-authored: on-demand catalog browser
-│   └── et-NNNN-<slug>/SKILL.md   # generated: one auto-loadable skill per tenet
+│   ├── using-warden/             # hand-authored bootstrap
+│   ├── lookup-tenet/             # hand-authored catalog browser
+│   └── et-NNNN-<slug>/           # generated: one auto-loadable skill per tenet
 ├── tenets/                       # source of truth — one file per tenet
-│   └── ET-0001-*.md
-├── templates/
-│   └── ET-NNNN-template.md       # starting point for `cp` when authoring a new tenet
-├── build/                        # generated, committed
-│   ├── charter.json              # consumed by SessionStart hook (functional)
-│   ├── charter.md                # same content, human-readable (review aid)
-│   └── index.md                  # consumed by lookup-tenet skill
-├── scripts/
-│   ├── build.py                  # validate + render build artifacts + skills
-│   ├── validate.py               # validation only
-│   └── lib/warden_lib.py         # parsing, validation, rendering
-├── tests/                        # pytest suite for build/validate/render
-├── pyproject.toml                # uv-managed deps + ruff/mypy/poe config
-└── uv.lock                       # pinned dependency versions (committed)
+├── templates/ET-NNNN-template.md # starting point for a new tenet
+├── build/                        # generated, committed (charter + index)
+├── scripts/                      # build/validation tooling — see CONTRIBUTING.md
+├── tests/                        # pytest suite
+└── pyproject.toml                # uv-managed deps + tool config
 ```
 
-The `skills/et-*/` directories are **fully generated** by `poe build`
-from `tenets/`. They are committed so the plugin is installable on
-`git clone` without a build step. Hand-authored skills (currently only
-`lookup-tenet`) live alongside and are never touched by the build.
+The `skills/et-*/` directories and `build/` are **fully generated**
+by `uv run poe build` from `tenets/`. They are committed so the
+plugin is installable on `git clone` without a build step.
+Hand-authored skills (`using-warden`, `lookup-tenet`) live alongside
+and are never touched by the build.
 
 ## Authoring a tenet
 
-1. Copy the template to a new file, picking the next free `NNNN` and a
-   gerund-style slug (see "Naming a tenet file" below):
+1. Copy the template, picking the next free `NNNN` and a gerund-style
+   slug (see "Naming a tenet file" below):
 
    ```bash
    cp templates/ET-NNNN-template.md tenets/ET-0042-keeping-something-private.md
@@ -92,17 +94,16 @@ from `tenets/`. They are committed so the plugin is installable on
 2. Edit the new file. The template's inline comments document every
    field — required: `id`, `title`, `type`, `severity`, `tier`,
    `applies-to`, `since`, `triggers`; optional: `paths`, `tags`,
-   `related`. Write the body sections in this order: `Rule`, `Why`,
-   `Bad Example`, `Good Example`, `Exceptions`, optionally
-   `Rationalizations`.
-3. Run `uv run poe validate` to confirm the file is well-formed.
-4. Run `uv run poe build` to regenerate `build/charter.{json,md}`,
-   `build/index.md`, and the per-tenet `skills/et-*/SKILL.md`. All
-   generated artifacts MUST be committed alongside the tenet — the
-   plugin must be installable on `git clone` without a build step.
+   `related`. Body sections, in order: `Rule`, `Why`, `Bad Example`,
+   `Good Example`, `Exceptions`, optionally `Rationalizations`.
 
-Or just run `uv run poe check` to do everything (format → lint →
-typecheck → validate → build → test) in one go before committing.
+3. Run `uv run poe build` to regenerate `build/` and the per-tenet
+   `skills/et-*/SKILL.md`. **All generated artifacts must be committed
+   alongside the source tenet** — the plugin must be installable on
+   `git clone` without a build step. CI fails on drift.
+
+For the full set of build/test/lint commands, the local check gate,
+and CI configuration, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Writing good `triggers`
 
@@ -162,7 +163,8 @@ paths:
 Omit `paths` for language-agnostic tenets (e.g. naming, commit
 hygiene, security) — they should be eligible everywhere.
 
-See `ET-0001-keeping-test-helpers-private.md` for a complete example.
+See `tenets/ET-0001-keeping-test-helpers-private.md` for a complete
+example.
 
 ### Naming a tenet file
 
@@ -176,75 +178,6 @@ The slug also drives the generated skill directory name
 (`skills/et-NNNN-<slug>/`), and skill names with positive,
 action-shaped slugs auto-invoke more reliably than negated topic
 labels. The `Rule` body keeps the hard "Never" — only the slug shifts.
-
-## Runtime requirements
-
-The SessionStart hook ([`hooks/inject-charter.cmd`](hooks/inject-charter.cmd))
-is a polyglot Windows-`.cmd` / POSIX-shell script — the same file is
-interpreted as a batch script by `cmd.exe` on Windows and as a shell
-script by `/bin/sh` on Unix. **No external runtime dependency is
-required**: only POSIX `sh` + `cat` (Unix) and `cmd.exe` + `type`
-(Windows), both of which are part of every base system. The hook
-emits a pre-built JSON payload (`build/charter.json`); JSON escaping
-is done at build time, never at runtime.
-
-All Python dev dependencies (PyYAML, pytest, ruff, mypy, types-pyyaml,
-poethepoet) live under `[dependency-groups.dev]` in
-[pyproject.toml](pyproject.toml) and are pinned to exact versions in
-[uv.lock](uv.lock). They are **dev-only** — used by maintainers to
-build, lint, type-check, and test tenets. Plugin consumers never run
-Python; they receive only the pre-built `build/` and `skills/et-*/`
-artifacts and the polyglot hook.
-
-## Maintainer setup
-
-The build/validation tooling uses [`uv`](https://docs.astral.sh/uv/)
-for dependency management and [`poethepoet`](https://poethepoet.natn.io/)
-as a cross-platform task runner. Both work identically on macOS,
-Linux, and Windows.
-
-### One-time setup
-
-```bash
-cd plugins/warden
-uv sync          # Creates .venv and installs dev dependencies from uv.lock.
-```
-
-That's it. There is no Make / shell-script bootstrap. The same command
-works in PowerShell, cmd.exe, bash, and zsh.
-
-### Day-to-day tasks
-
-Run any task with `uv run poe <task>`:
-
-| Command                       | What it does                                                            |
-|-------------------------------|-------------------------------------------------------------------------|
-| `uv run poe validate`         | Validate every tenet against the spec                                   |
-| `uv run poe build`            | Validate + regenerate `build/` artifacts and per-tenet skills           |
-| `uv run poe build-check`      | Verify committed `build/` and `skills/et-*/` match `tenets/` (no writes)|
-| `uv run poe test`             | Run the pytest suite                                                    |
-| `uv run poe lint`             | Ruff lint check (no auto-fix)                                           |
-| `uv run poe fix`              | Ruff lint with auto-fix                                                 |
-| `uv run poe format`           | Ruff format (writes changes)                                            |
-| `uv run poe format-check`     | Ruff format check (no writes)                                           |
-| `uv run poe typecheck`        | MyPy strict type-check                                                  |
-| `uv run poe check`            | format → lint → typecheck → validate → build → test (local gate)        |
-| `uv run poe ci`               | format-check → lint → typecheck → validate → build-check → test (CI)    |
-
-`uv run poe -h` lists every task. `uv run poe -h <task>` shows a single
-task's help line.
-
-### Code style
-
-- **Line length:** 100 characters (configured in `pyproject.toml`).
-- **Formatter:** Ruff (Black-compatible). Quote style is double quotes.
-- **Type checking:** MyPy `strict = true` for `scripts/`. Tests are
-  exempted from `disallow_untyped_defs` because pytest fixtures rely
-  on duck typing.
-- **Imports:** sorted by Ruff's `I` rule (isort-equivalent).
-
-The `poe check` task runs the full local gate. CI should run `poe ci`,
-which fails if formatting drift exists rather than auto-fixing it.
 
 ## Versioning
 
