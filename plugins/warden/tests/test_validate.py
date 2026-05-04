@@ -109,6 +109,31 @@ def test_overly_long_trigger_is_flagged(make_tenet, tenets_dir: Path):
     assert any("trigger entry length" in e.message for e in errors)
 
 
+def test_tier2_without_paths_is_flagged(make_tenet, tenets_dir: Path):
+    # Tier 2 = language-/framework-specific. Without `paths:` the skill lands
+    # in the global description-match pool, which doesn't scale.
+    p = make_tenet(tier=2, applies_to={"language": "TypeScript"})
+    errors = _validate(tenets_dir)
+    assert any("tier 2 tenets must set `paths:`" in e.message for e in errors), (
+        f"expected tier-2-without-paths error for {p.name}, got {[e.message for e in errors]}"
+    )
+
+
+def test_tier2_with_paths_is_valid(make_tenet, tenets_dir: Path):
+    p = make_tenet(tier=2, applies_to={"language": "TypeScript"})
+    p.write_text(
+        p.read_text(encoding="utf-8").replace("tier: 2", 'tier: 2\npaths:\n  - "**/*.ts"', 1),
+        encoding="utf-8",
+    )
+    assert _validate(tenets_dir) == []
+
+
+def test_tier1_without_paths_is_valid(make_tenet, tenets_dir: Path):
+    # Tier 1 = universal. Language-agnostic tenets stay eligible everywhere.
+    make_tenet(tier=1)
+    assert _validate(tenets_dir) == []
+
+
 def test_missing_section_is_flagged(make_tenet, tenets_dir: Path):
     p = make_tenet()
     text = p.read_text()

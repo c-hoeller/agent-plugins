@@ -46,9 +46,12 @@ budget. Per-tenet detail lives in skills and only enters context when
 relevant.
 
 **Tier 1** = universal, high-severity. Listed in the Charter index.
+`paths:` is optional — universal tenets stay eligible everywhere.
 **Tier 2** = language- or framework-specific. Not listed in the
-Charter; auto-loads via skill triggers (and `paths:` globs) when
-relevant code is touched.
+Charter; auto-loads via skill triggers gated by a **required** `paths:`
+glob. Validation rejects tier 2 without `paths:` — an unscoped tier 2
+tenet would compete in the global description-match pool against every
+other skill and break the budget once the catalog grows.
 
 The `SessionStart` hook ([`hooks/inject-charter.cmd`](hooks/inject-charter.cmd))
 is a polyglot Windows-`.cmd` / POSIX-shell script — the same file

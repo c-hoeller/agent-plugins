@@ -15,14 +15,16 @@ severity: high
 
 # 1 = universal, always-relevant; listed in the always-on Charter index.
 # 2 = language- or framework-specific; not listed in Charter, auto-loads
-#     via skill triggers (and optionally `paths:`) when relevant code is
-#     touched.
+#     via skill triggers + REQUIRED `paths:` glob (validation enforces it).
+#     Tier 2 without `paths:` would compete in the global description-match
+#     pool against every other skill and break the budget at scale.
 tier: 1
 
-# any | "<key>: <name>" | { <key>: <name> } | list of the above
-# <key> ∈ { language, framework }
+# "any" | { language: <name> } | { framework: <name> }
 # Use "any" only for genuinely universal tenets. Anything language- or
 # framework-specific should say so here AND scope via `paths:` below.
+# Multi-language tenets: keep applies-to single-key, list the languages
+# in `paths:` instead (e.g. paths: ["**/*.{ts,tsx,js,jsx}"]).
 applies-to: any
 
 # Plugin SemVer in which this tenet was introduced. Bump only when the
@@ -49,12 +51,11 @@ triggers:
   - <a different angle — the user's framing or the agent's planned action>
   - <the diff-review angle: "reviewing a diff that …">
 
-# OPTIONAL: glob patterns scoping auto-invocation to specific files.
-# Use this for language- or framework-specific tenets — it's more
-# deterministic than description matching and frees the global skill-
-# description budget for tenets that can't apply to the current file.
-# Omit entirely for language-agnostic tenets (naming, security, commit
-# hygiene, etc.).
+# Glob patterns scoping auto-invocation to specific files. **Required**
+# for tier: 2 (validation rejects tier 2 without paths). Optional for
+# tier: 1 — universal tenets stay eligible everywhere. Scoping frees
+# the global skill-description budget for tenets that can't apply to
+# the current file.
 #
 # paths:
 #   - "**/*.ts"

@@ -298,11 +298,20 @@ def validate(tenets: Iterable[Tenet]) -> list[WardenError]:
                         f"trigger entry length {len(trig)} exceeds 200 chars: {trig[:60]!r}...",
                     )
                 )
-        # paths — optional list of glob patterns. When present, the generated
-        # skill scopes auto-invocation deterministically to matching file
-        # paths instead of (or in addition to) description matching. This is
-        # the primary scaling mechanism for language- or framework-specific
-        # tenets — see README "Writing good triggers".
+        # paths — list of glob patterns scoping where the generated skill
+        # auto-invokes. Required for Tier 2 (otherwise the tenet would land
+        # unscoped in the global description-match pool and crowd it out at
+        # scale, see UNSCOPED_DESCRIPTION_BUDGET_CHARS); optional for Tier 1
+        # (universal tenets are eligible everywhere).
+        if t.tier == 2 and not t.paths:
+            errors.append(
+                WardenError(
+                    t.path,
+                    "tier 2 tenets must set `paths:` to scope auto-invocation; "
+                    "an unscoped tier 2 tenet competes in the global description "
+                    "pool against all other skills and breaks the budget at scale",
+                )
+            )
         for pat in t.paths:
             if not pat.strip():
                 errors.append(WardenError(t.path, "paths must not contain empty entries"))
