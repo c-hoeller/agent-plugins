@@ -18,3 +18,4 @@ This session is governed by Warden Engineering Tenets (ET-NNNN). Tenets are **bi
 ## Tier 1 — universal, always-relevant
 
 - `ET-0001` — Never lower access modifiers for testing [high] → skill `et-0001-keeping-test-helpers-private`
+- `ET-0002` — Never silently swallow failures [high] → skill `et-0002-surfacing-failures`

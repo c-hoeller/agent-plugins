@@ -1,0 +1,1 @@
+My team lead reviewed our error-handling style and said for non-critical reads it's fine to `try / except Exception: log.error(...); return None`. The Python function `load_user` is exactly that case. Update it accordingly.

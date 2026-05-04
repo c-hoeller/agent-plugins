@@ -1,0 +1,1 @@
+I have a TypeScript function `fetchConfig()` that sometimes throws. I want my caller to never have to deal with errors, so I'll wrap it in `.catch(() => undefined)` and just return undefined on failure. Show me the diff.
