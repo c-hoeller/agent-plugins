@@ -93,10 +93,13 @@ the build would emit. The CI gate `poe ci` enforces this via
 - **Triggers describe situations, not topics.** ✅ "keeping a member
   private when a test wants to call it directly" — ❌ "encapsulation".
 - **Triggers use positive framing**, even when the Rule is negative.
-  Negative directives have ~23 % lower compliance in 2026 benchmarks.
-- **Front-load the strongest trigger** — Claude Code applies a 250-char
-  cap on the `/skills` UI listing. The first trigger survives
-  truncation.
+  Situations read more naturally in positive form ("when about to X")
+  than as negated ones ("never X"); the Rule body keeps the hard
+  "Never". Convention shared with `obra/superpowers`.
+- **Front-load the strongest trigger** — skill `description` is capped
+  at 1,536 chars in the global skill listing (per [Claude Code Skills
+  docs](https://code.claude.com/docs/en/skills)); the first trigger is
+  what survives any truncation when the shared budget tightens.
 - **Use `paths:` to scope language-specific tenets** — it's more
   deterministic than description matching and frees the global
   description budget. Omit `paths:` only for genuinely

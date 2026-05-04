@@ -47,10 +47,12 @@ REQUIRED_FRONTMATTER: tuple[str, ...] = (
     "triggers",
 )
 
-# Skill `description` field has a Claude Code soft cap of ~1024 chars; we keep
-# tenet skill descriptions tight to leave room for many tenets in the always-on
-# trigger set.
-SKILL_DESCRIPTION_MAX_CHARS = 900
+# Skill `description` (combined with `when_to_use`, if used) is capped at
+# 1,536 chars in the global skill listing per Claude Code Skills docs. We
+# keep a margin under that for safety and to leave room in the shared
+# description budget when many tenets are active. Raise cautiously — every
+# extra char per skill multiplies across the whole catalog.
+SKILL_DESCRIPTION_MAX_CHARS = 1400
 SKILL_NAME_MAX_CHARS = 64
 
 
@@ -450,9 +452,10 @@ def _build_skill_description(tenet: Tenet) -> str:
     treating the description as a shortcut and skipping the skill body
     (obra/superpowers writing-skills convention).
 
-    Front-loaded triggers also matter because Claude Code applies a 250-char
-    cap on the `/skills` UI listing in addition to the per-skill char budget;
-    the strongest trigger phrases must come first to survive truncation.
+    Front-loaded triggers also matter because the description (combined with
+    `when_to_use` if set) is capped at 1,536 chars in the global skill listing;
+    when the shared description budget tightens, the first trigger is what
+    survives truncation.
     """
     triggers = "; ".join(t.strip().rstrip(".") for t in tenet.triggers if t.strip())
     description = f"Use when {triggers}."

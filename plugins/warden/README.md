@@ -113,16 +113,21 @@ matches against to auto-invoke the skill. Three rules:
    agent or user is in, not the abstract subject. "keeping a member
    private when a test wants to call it directly" beats "encapsulation
    in tests".
-2. **Positive framing, even when the rule is negative.** Benchmarks
-   show ~23 % lower compliance for negative directives ("never X")
-   versus positive ones ("when about to X"). The Rule itself can — and
-   should — be a hard "Never". The triggers describe the *situation*
-   that activates the tenet, and situations read better in positive
-   form.
-3. **Front-load the strongest trigger.** Claude Code applies a
-   ~250-character cap on the `/skills` UI listing on top of the
-   per-skill description budget. The first trigger in the list is the
-   one that survives truncation. Put your best one first.
+2. **Positive framing, even when the rule is negative.** Triggers
+   describe the *situation* that activates the tenet, and situations
+   read more naturally in positive form ("when about to X") than as
+   negated ones ("never X"). The Rule body itself can — and should — be
+   a hard "Never"; only the triggers shift. This convention is shared
+   with `obra/superpowers`, where it correlates with more reliable
+   auto-invocation in observed sessions.
+3. **Front-load the strongest trigger.** Skill `description` (combined
+   with `when_to_use` if present) is capped at 1,536 characters in the
+   global skill listing (see [Claude Code Skills docs][skills]); when
+   the trigger list grows or the shared budget tightens, the first
+   trigger is the one that survives any truncation. Put the situation
+   that most directly activates this tenet first.
+
+[skills]: https://code.claude.com/docs/en/skills
 
 Example:
 

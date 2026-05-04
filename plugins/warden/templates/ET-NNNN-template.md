@@ -39,10 +39,11 @@ since: 0.1.0
 #      ✅ "keeping a member private when a test wants to call it directly"
 #      ❌ "encapsulation in tests"
 #   2. Positive framing, even when the Rule is negative ("Never X").
-#      Negative directives have ~23 % lower compliance in 2026 benchmarks.
-#   3. Front-load the strongest trigger — Claude Code applies a 250-char
-#      cap on the `/skills` UI listing in addition to the per-skill
-#      description budget. The first trigger survives truncation.
+#      Situations read more naturally in positive form; only the Rule
+#      body keeps the hard "Never".
+#   3. Front-load the strongest trigger — skill `description` is capped
+#      at 1,536 chars in the global skill listing (Claude Code Skills
+#      docs). The first trigger is what survives truncation.
 triggers:
   - <the situation that most directly activates this tenet>
   - <a different angle — the user's framing or the agent's planned action>

@@ -28,15 +28,22 @@ auto-loaded skill tool calls. Resolve the plugin root once at the
 start of the lookup and reuse it:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(claude plugin path warden 2>/dev/null)}"
-# Fallback: search for the warden plugin under common install locations.
+# Prefer the env var when available (set by Claude Code for plugin tooling).
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-}"
+
+# Fallback: search common install roots for a warden plugin directory that
+# carries a build/ folder (the marker that distinguishes it from a stub).
 if [ -z "$PLUGIN_ROOT" ] || [ ! -d "$PLUGIN_ROOT/build" ]; then
-  for candidate in \
-      "$HOME/.claude/plugins/warden" \
-      "$HOME/.config/claude-code/plugins/warden" \
-      ./plugins/warden; do
-    [ -d "$candidate/build" ] && PLUGIN_ROOT="$candidate" && break
-  done
+  PLUGIN_ROOT="$(
+    for root in \
+        "$HOME/.claude/plugins" \
+        "$HOME/.config/claude-code/plugins" \
+        "./plugins" "."; do
+      [ -d "$root" ] || continue
+      find "$root" -maxdepth 4 -type d -name warden 2>/dev/null \
+        | while read -r d; do [ -d "$d/build" ] && echo "$d" && break; done
+    done | head -1
+  )"
 fi
 ```
 

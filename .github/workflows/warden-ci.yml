@@ -1,0 +1,40 @@
+name: warden-ci
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - plugins/warden/**
+      - .github/workflows/warden-ci.yml
+  pull_request:
+    paths:
+      - plugins/warden/**
+      - .github/workflows/warden-ci.yml
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: plugins/warden
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: plugins/warden/uv.lock
+      - run: uv sync --frozen
+      - run: uv run poe ci
