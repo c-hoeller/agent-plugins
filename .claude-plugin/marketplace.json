@@ -6,13 +6,10 @@
     "name": "Christoph Höller",
     "email": "c.m.hoeller@outlook.com"
   },
-  "metadata": {
-    "pluginRoot": "./plugins"
-  },
   "plugins": [
     {
       "name": "warden",
-      "source": "warden",
+      "source": "./plugins/warden",
       "description": "Senior coding standards as Engineering Tenets, auto-loaded into every Claude Code session.",
       "version": "0.1.0"
     }
