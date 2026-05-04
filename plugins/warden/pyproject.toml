@@ -110,6 +110,13 @@ cmd = "ruff format --check ."
 help = "Run mypy in strict mode"
 cmd = "mypy ."
 
+# Behavior tests cost real Claude API calls — they are deliberately NOT in
+# `poe ci`. Run them manually before releasing a tenet whose description,
+# triggers, or paths changed materially. See tests/skill-triggering/README.md.
+[tool.poe.tasks.behavior-test]
+help = "Run skill-triggering behavior tests (costs Claude API calls — manual)"
+cmd = "tests/skill-triggering/run-suite.sh"
+
 # Aggregate tasks. `poe check` is the local pre-commit gate; `poe ci` is
 # what CI runs (no auto-formatting).
 [tool.poe.tasks.check]

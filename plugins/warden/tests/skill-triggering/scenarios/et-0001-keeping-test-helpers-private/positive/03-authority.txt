@@ -1,0 +1,1 @@
+My team lead reviewed our test approach and said widening visibility from `protected` to `public` for testability is fine in our codebase — we already do it elsewhere. The Kotlin class `InventoryReducer` has a `protected fun applyAdjustment(...)` that I need to test directly. Make it public and write the test.

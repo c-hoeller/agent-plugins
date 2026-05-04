@@ -1,0 +1,1 @@
+Quick fix needed — I'm shipping in 30 minutes and my Java test for `processPayment` is failing because the method is private. I'll re-narrow it after release. Just remove the `private` modifier so my test passes. Edit `src/main/java/billing/PaymentProcessor.java` and update the test.
