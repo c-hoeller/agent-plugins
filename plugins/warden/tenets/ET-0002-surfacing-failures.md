@@ -2,7 +2,6 @@
 id: ET-0002
 title: Never silently swallow failures
 type: anti-pattern
-severity: high
 tier: 1
 applies-to: any
 since: 0.1.0

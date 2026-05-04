@@ -28,12 +28,6 @@ def test_duplicate_ids_are_flagged(make_tenet, tenets_dir: Path):
     assert any("duplicate id" in e.message for e in errors)
 
 
-def test_invalid_severity_is_flagged(make_tenet, tenets_dir: Path):
-    make_tenet(severity="huge")
-    errors = _validate(tenets_dir)
-    assert any("severity" in e.message for e in errors)
-
-
 def test_invalid_type_is_flagged(make_tenet, tenets_dir: Path):
     make_tenet(type="rule")
     errors = _validate(tenets_dir)

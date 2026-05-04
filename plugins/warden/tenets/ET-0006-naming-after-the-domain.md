@@ -2,7 +2,6 @@
 id: ET-0006
 title: Names describe the domain, not the implementation
 type: best-practice
-severity: medium
 tier: 1
 applies-to: any
 since: 0.1.0

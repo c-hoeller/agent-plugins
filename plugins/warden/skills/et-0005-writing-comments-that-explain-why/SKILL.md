@@ -6,7 +6,7 @@ description: Use when writing a comment that paraphrases the line of code immedi
 
 # ET-0005 — Comments explain why, not what
 
-_Type: best-practice · Severity: medium · Tier: 1_
+_Type: best-practice · Tier: 1_
 
 ## Rule
 

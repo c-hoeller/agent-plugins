@@ -50,7 +50,6 @@ def test_load_tenet_reads_full_record(valid_tenet: Path):
     assert t.id == "ET-0001"
     assert t.title == "Example tenet"
     assert t.type == "best-practice"
-    assert t.severity == "high"
     assert t.tier == 1
     assert t.applies_to == "any"
     assert t.since == "0.1.0"

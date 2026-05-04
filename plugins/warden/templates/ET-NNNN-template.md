@@ -10,9 +10,6 @@ title: <one-sentence imperative title>
 # best-practice | anti-pattern
 type: anti-pattern
 
-# critical | high | medium | low
-severity: high
-
 # 1 = universal, always-relevant; listed in the always-on Charter index.
 # 2 = language- or framework-specific; not listed in Charter, auto-loads
 #     via skill triggers + REQUIRED `paths:` glob (validation enforces it).

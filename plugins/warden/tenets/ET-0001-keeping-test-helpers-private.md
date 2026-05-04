@@ -2,7 +2,6 @@
 id: ET-0001
 title: Never lower access modifiers for testing
 type: anti-pattern
-severity: high
 tier: 1
 applies-to: any
 triggers:

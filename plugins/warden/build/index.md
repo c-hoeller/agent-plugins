@@ -1,11 +1,11 @@
 # Warden — Engineering Tenets Index
 
-One line per tenet. Format: `ET-NNNN — <title> — <type> — <severity> — [<tags>]`.
+One line per tenet. Format: `ET-NNNN — <title> — <type> — [<tags>]`.
 
-- `ET-0001` — Never lower access modifiers for testing — anti-pattern — high — applies-to: any — tags: [testing, encapsulation, oop]
-- `ET-0002` — Never silently swallow failures — anti-pattern — high — applies-to: any — tags: [error-handling, observability, reliability]
-- `ET-0003` — Validate at trust boundaries, trust the core — best-practice — high — applies-to: any — tags: [validation, boundaries, defensive-programming, types]
-- `ET-0004` — Tests assert observable behavior, not implementation — best-practice — high — applies-to: any — tags: [testing, mocks, refactoring, behavior]
-- `ET-0005` — Comments explain why, not what — best-practice — medium — applies-to: any — tags: [comments, documentation, readability]
-- `ET-0006` — Names describe the domain, not the implementation — best-practice — medium — applies-to: any — tags: [naming, readability, domain]
-- `ET-0007` — Reach for `unknown` and validation, not `any` or unchecked `as` — anti-pattern — high — applies-to: language:TypeScript — tags: [typescript, types, validation, casts]
+- `ET-0001` — Never lower access modifiers for testing — anti-pattern — applies-to: any — tags: [testing, encapsulation, oop]
+- `ET-0002` — Never silently swallow failures — anti-pattern — applies-to: any — tags: [error-handling, observability, reliability]
+- `ET-0003` — Validate at trust boundaries, trust the core — best-practice — applies-to: any — tags: [validation, boundaries, defensive-programming, types]
+- `ET-0004` — Tests assert observable behavior, not implementation — best-practice — applies-to: any — tags: [testing, mocks, refactoring, behavior]
+- `ET-0005` — Comments explain why, not what — best-practice — applies-to: any — tags: [comments, documentation, readability]
+- `ET-0006` — Names describe the domain, not the implementation — best-practice — applies-to: any — tags: [naming, readability, domain]
+- `ET-0007` — Reach for `unknown` and validation, not `any` or unchecked `as` — anti-pattern — applies-to: language:TypeScript — tags: [typescript, types, validation, casts]

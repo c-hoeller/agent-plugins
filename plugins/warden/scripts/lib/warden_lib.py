@@ -22,7 +22,6 @@ SEMVER_RE = re.compile(
     r"(?:-[0-9A-Za-z\-.]+)?(?:\+[0-9A-Za-z\-.]+)?$"
 )
 
-SEVERITIES = ("critical", "high", "medium", "low")
 TYPES = ("best-practice", "anti-pattern")
 TIERS = (1, 2)
 APPLIES_TO_KEYS = ("language", "framework")
@@ -40,7 +39,6 @@ REQUIRED_FRONTMATTER: tuple[str, ...] = (
     "id",
     "title",
     "type",
-    "severity",
     "tier",
     "applies-to",
     "since",
@@ -85,7 +83,6 @@ class Tenet:
     id: str
     title: str
     type: str
-    severity: str
     tier: int
     applies_to: Any
     since: str
@@ -182,7 +179,6 @@ def load_tenet(path: Path) -> Tenet:
         id=str(meta.get("id", "")),
         title=str(meta.get("title", "")),
         type=str(meta.get("type", "")),
-        severity=str(meta.get("severity", "")),
         tier=int(meta["tier"]) if isinstance(meta.get("tier"), int) else -1,
         applies_to=meta.get("applies-to"),
         since=str(meta.get("since", "")),
@@ -263,11 +259,9 @@ def validate(tenets: Iterable[Tenet]) -> list[WardenError]:
             errors.append(WardenError(t.path, "title is missing"))
         elif len(t.title) > 80:
             errors.append(WardenError(t.path, f"title length {len(t.title)} exceeds 80 chars"))
-        # Type / severity / tier
+        # Type / tier
         if t.type not in TYPES:
             errors.append(WardenError(t.path, f"type {t.type!r} not in {TYPES}"))
-        if t.severity not in SEVERITIES:
-            errors.append(WardenError(t.path, f"severity {t.severity!r} not in {SEVERITIES}"))
         if t.tier not in TIERS:
             errors.append(WardenError(t.path, f"tier {t.tier!r} not in {TIERS}"))
         # applies-to
@@ -413,16 +407,14 @@ def render_charter(tenets: Iterable[Tenet]) -> str:
         "may not know the tenet exists, or may be invoking an Exception "
         "without realising it. Either is fine; silent compliance is not."
     )
-    lines.append(
-        '- _"It\'s a small change"_ — tenet severity is independent of diff size. Apply the Rule.'
-    )
+    lines.append('- _"It\'s a small change"_ — diff size is not a tenet exception. Apply the Rule.')
     lines.append("")
 
     if tier1:
         lines.append("## Tier 1 — universal, always-relevant")
         lines.append("")
         for t in tier1:
-            lines.append(f"- `{t.id}` — {t.title} [{t.severity}] → skill `{_skill_name_for(t)}`")
+            lines.append(f"- `{t.id}` — {t.title} → skill `{_skill_name_for(t)}`")
         lines.append("")
 
     tier2 = [t for t in tenet_list if t.tier == 2]
@@ -512,7 +504,7 @@ def render_skill_for_tenet(tenet: Tenet) -> tuple[str, str]:
     body.append("")
     body.append(f"# {tenet.id} — {tenet.title}")
     body.append("")
-    body.append(f"_Type: {tenet.type} · Severity: {tenet.severity} · Tier: {tenet.tier}_")
+    body.append(f"_Type: {tenet.type} · Tier: {tenet.tier}_")
     body.append("")
     for section in REQUIRED_SECTIONS:
         content = tenet.sections.get(section, "").strip()
@@ -557,13 +549,13 @@ def render_index(tenets: Iterable[Tenet]) -> str:
     lines = [
         "# Warden — Engineering Tenets Index",
         "",
-        "One line per tenet. Format: `ET-NNNN — <title> — <type> — <severity> — [<tags>]`.",
+        "One line per tenet. Format: `ET-NNNN — <title> — <type> — [<tags>]`.",
         "",
     ]
     for t in sorted_tenets:
         tag_str = "[" + ", ".join(t.tags) + "]" if t.tags else "[]"
         lines.append(
-            f"- `{t.id}` — {t.title} — {t.type} — {t.severity} — "
+            f"- `{t.id}` — {t.title} — {t.type} — "
             f"applies-to: {_format_applies_to(t.applies_to)} — tags: {tag_str}"
         )
     lines.append("")
@@ -594,7 +586,6 @@ def render_index_json(tenets: Iterable[Tenet]) -> str:
                 "id": t.id,
                 "title": t.title,
                 "type": t.type,
-                "severity": t.severity,
                 "tier": t.tier,
                 "applies_to": t.applies_to,
                 "paths": t.paths,

@@ -6,7 +6,7 @@ description: Use when writing a test that verifies a mock was called instead of 
 
 # ET-0004 — Tests assert observable behavior, not implementation
 
-_Type: best-practice · Severity: high · Tier: 1_
+_Type: best-practice · Tier: 1_
 
 ## Rule
 

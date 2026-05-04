@@ -2,7 +2,6 @@
 id: ET-0007
 title: Reach for `unknown` and validation, not `any` or unchecked `as`
 type: anti-pattern
-severity: high
 tier: 2
 applies-to: { language: TypeScript }
 since: 0.1.0

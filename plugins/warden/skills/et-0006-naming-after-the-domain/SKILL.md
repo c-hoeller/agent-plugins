@@ -6,7 +6,7 @@ description: Use when choosing a name for a variable, parameter, field, or type 
 
 # ET-0006 — Names describe the domain, not the implementation
 
-_Type: best-practice · Severity: medium · Tier: 1_
+_Type: best-practice · Tier: 1_
 
 ## Rule
 

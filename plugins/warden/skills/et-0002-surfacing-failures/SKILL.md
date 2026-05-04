@@ -6,7 +6,7 @@ description: Use when handling an error you do not know how to recover from in t
 
 # ET-0002 — Never silently swallow failures
 
-_Type: anti-pattern · Severity: high · Tier: 1_
+_Type: anti-pattern · Tier: 1_
 
 ## Rule
 

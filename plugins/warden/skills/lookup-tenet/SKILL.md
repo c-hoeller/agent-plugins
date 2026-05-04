@@ -51,9 +51,9 @@ Once `$PLUGIN_ROOT` is known, two index forms are available:
 
 - `$PLUGIN_ROOT/build/index.md` — one-line-per-tenet, human-scannable.
 - `$PLUGIN_ROOT/build/index.json` — structured. Use this for any
-  query that involves filtering by tag, language, framework, tier, or
-  severity. As the catalog grows past ~15 tenets, the markdown index
-  is no longer scan-friendly; the JSON index is.
+  query that involves filtering by tag, language, framework, or tier.
+  As the catalog grows past ~15 tenets, the markdown index is no
+  longer scan-friendly; the JSON index is.
 
 ### Discovery patterns
 
@@ -71,9 +71,6 @@ jq -r '.tenets[]
 
 # By tier — "all tier 1 tenets, listed in the always-on charter"
 jq -r '.tenets[] | select(.tier == 1) | .id + " — " + .title' "$INDEX"
-
-# By severity — "critical or high tenets only"
-jq -r '.tenets[] | select(.severity == "critical" or .severity == "high") | .id' "$INDEX"
 
 # Find a specific tenet by ID and print its skill name
 jq -r '.tenets[] | select(.id == "ET-0001") | .skill' "$INDEX"

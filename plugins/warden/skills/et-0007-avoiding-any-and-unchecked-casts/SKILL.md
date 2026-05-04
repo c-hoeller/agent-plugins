@@ -7,7 +7,7 @@ paths: ["**/*.ts", "**/*.tsx"]
 
 # ET-0007 — Reach for `unknown` and validation, not `any` or unchecked `as`
 
-_Type: anti-pattern · Severity: high · Tier: 2_
+_Type: anti-pattern · Tier: 2_
 
 ## Rule
 

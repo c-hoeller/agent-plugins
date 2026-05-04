@@ -8,7 +8,13 @@ from lib import warden_lib
 
 def test_render_index_lists_each_tenet(make_tenet, tenets_dir: Path):
     make_tenet(id="ET-0001", slug="a", title="First", tags=["testing", "oop"])
-    make_tenet(id="ET-0002", slug="b", title="Second", tier=2, severity="low")
+    make_tenet(id="ET-0002", slug="b", title="Second", tier=2)
+    # ET-0002 is tier 2 — needs paths to be valid; inject directly.
+    p = tenets_dir / "ET-0002-b.md"
+    p.write_text(
+        p.read_text(encoding="utf-8").replace("tier: 2", 'tier: 2\npaths:\n  - "**/*.py"', 1),
+        encoding="utf-8",
+    )
     tenets = warden_lib.load_all(tenets_dir)
     out = warden_lib.render_index(tenets)
     assert "ET-0001" in out
@@ -35,7 +41,7 @@ def test_render_index_json_emits_structured_tenets(make_tenet, tenets_dir: Path)
         tags=["testing", "oop"],
         applies_to={"language": "TypeScript"},
     )
-    make_tenet(id="ET-0002", slug="b", title="Second", tier=2, severity="low")
+    make_tenet(id="ET-0002", slug="b", title="Second", tier=2)
     # ET-0002 is tier 2 — needs paths to be valid; inject directly.
     p = tenets_dir / "ET-0002-b.md"
     p.write_text(

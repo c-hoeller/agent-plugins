@@ -6,7 +6,7 @@ description: Use when adding a null/range/format check inside an internal helper
 
 # ET-0003 — Validate at trust boundaries, trust the core
 
-_Type: best-practice · Severity: high · Tier: 1_
+_Type: best-practice · Tier: 1_
 
 ## Rule
 

@@ -2,7 +2,6 @@
 id: ET-0004
 title: Tests assert observable behavior, not implementation
 type: best-practice
-severity: high
 tier: 1
 applies-to: any
 since: 0.1.0

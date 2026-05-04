@@ -2,7 +2,6 @@
 id: ET-0005
 title: Comments explain why, not what
 type: best-practice
-severity: medium
 tier: 1
 applies-to: any
 since: 0.1.0

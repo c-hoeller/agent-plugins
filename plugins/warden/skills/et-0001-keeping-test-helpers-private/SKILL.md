@@ -7,7 +7,7 @@ paths: ["**/*.ts", "**/*.tsx", "**/*.java", "**/*.kt", "**/*.kts", "**/*.swift",
 
 # ET-0001 — Never lower access modifiers for testing
 
-_Type: anti-pattern · Severity: high · Tier: 1_
+_Type: anti-pattern · Tier: 1_
 
 ## Rule
 

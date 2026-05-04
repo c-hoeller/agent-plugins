@@ -45,7 +45,7 @@ index line, so adding tenets does not balloon the always-on context
 budget. Per-tenet detail lives in skills and only enters context when
 relevant.
 
-**Tier 1** = universal, high-severity. Listed in the Charter index.
+**Tier 1** = universal, language-agnostic. Listed in the Charter index.
 `paths:` is optional — universal tenets stay eligible everywhere.
 **Tier 2** = language- or framework-specific. Not listed in the
 Charter; auto-loads via skill triggers gated by a **required** `paths:`
@@ -95,9 +95,9 @@ and are never touched by the build.
    ```
 
 2. Edit the new file. The template's inline comments document every
-   field — required: `id`, `title`, `type`, `severity`, `tier`,
-   `applies-to`, `since`, `triggers`; optional: `paths`, `tags`,
-   `related`. Body sections, in order: `Rule`, `Why`, `Bad Example`,
+   field — required: `id`, `title`, `type`, `tier`, `applies-to`,
+   `since`, `triggers`; optional: `paths`, `tags`, `related`. Body
+   sections, in order: `Rule`, `Why`, `Bad Example`,
    `Good Example`, `Exceptions`, optionally `Rationalizations`.
 
 3. Run `uv run poe build` to regenerate `build/` and the per-tenet
@@ -187,7 +187,7 @@ labels. The `Rule` body keeps the hard "Never" — only the slug shifts.
 Warden follows SemVer from `0.1.0`.
 
 - **Patch:** new tenet, copy edits, additive non-breaking metadata.
-- **Minor:** new optional frontmatter field, new tier, new severity.
+- **Minor:** new optional frontmatter field, new tier.
 - **Major:** removed/renamed required frontmatter field or required
   body section — anything that breaks existing tenets.
 

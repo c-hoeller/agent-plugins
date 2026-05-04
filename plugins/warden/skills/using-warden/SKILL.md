@@ -54,7 +54,7 @@ confident" is a rationalization; see the table below.
 | "This is a special case." | Every violation feels special. | Apply the Rule unless an `Exceptions` clause names your case. |
 | "Just for now / I'll fix it later." | Later rarely arrives. | Fix it now, or document the deviation in the PR description with the tenet ID. |
 | "The user told me to." | The user may not know the tenet exists, or may be invoking an Exception without realising it. | Surface the tenet ID and ask. Silent compliance is not acceptable. |
-| "It's a small change." | Tenet severity is independent of diff size. | Apply the Rule. |
+| "It's a small change." | Diff size is not a tenet exception. | Apply the Rule. |
 | "I already started, switching now would be wasteful." | Sunk cost is not a tenet exception. | Stop. Re-plan. The smaller cost is now, not later. |
 | "The tests would be much harder otherwise." | Hard-to-test code is design feedback, not a tenet override. | Read the tenet's `Why` and `Bad Example` — they almost always already address this. |
 
