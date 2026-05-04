@@ -4,6 +4,9 @@
 docs/superpowers/
 **/IDEAS.md
 
+# Behavior-measurement reports — generated per-run, vary by API, not committed
+**/measurements/*/report.md
+
 # Per-plugin development environments
 plugins/*/.venv/
 plugins/*/.pytest_cache/

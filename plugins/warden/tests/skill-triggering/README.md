@@ -25,6 +25,29 @@ and slow CI without proportional benefit.
 Use `uv run poe behavior-test` to run the full suite locally when you've
 materially changed a tenet's `description`, `triggers`, or `paths:`.
 
+## Pass/fail tests vs. measurements
+
+Two distinct concepts live under this directory:
+
+- **`scenarios/<skill>/positive/*.txt`** — pass/fail behavior tests.
+  Run via `run-test.sh` / `run-suite.sh`. The expected skill MUST fire
+  or the test fails. Use these to pin a skill's auto-load contract
+  once you have evidence it works.
+- **`measurements/<measurement-name>/<class>/*.txt`** — data-collection
+  runs. Run via `measure.sh <measurement-name>`. The script records
+  every Skill invocation per prompt and emits a markdown report under
+  `measurements/<name>/report.md` (gitignored). Use these to *decide*
+  whether a description tweak / force-load mechanism / reorganisation
+  is justified, before pinning anything as a pass/fail test.
+
+The first measurement in the tree is `using-warden`, which collects
+empirical data on whether the bootstrap skill auto-loads in vague,
+competing-with-et, and non-code prompts. Run with:
+
+```bash
+uv run poe behavior-measure using-warden
+```
+
 ## Layout
 
 ```text

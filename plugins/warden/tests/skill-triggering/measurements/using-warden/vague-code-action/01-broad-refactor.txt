@@ -1,0 +1,1 @@
+I want to refactor the OrderService class — what's a sensible approach for splitting it up and what should I watch out for?

@@ -1,0 +1,1 @@
+My API call fails intermittently and I just want to log the error and return null so the rest of the function keeps working. Show me a try/catch that does that.

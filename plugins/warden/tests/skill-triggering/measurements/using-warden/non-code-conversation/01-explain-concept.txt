@@ -1,0 +1,1 @@
+What's the difference between a monorepo and a polyrepo, and which one would you pick for a 5-person team building a microservices backend?

@@ -1,0 +1,1 @@
+I have a TypeScript class with a `private calculateDiscount(order)` method, and I want to write a unit test for it. The test cannot reach a private method. Should I just change `private` to `public` so the test can call it?

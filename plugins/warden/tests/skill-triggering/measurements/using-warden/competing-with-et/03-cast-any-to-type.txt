@@ -1,0 +1,1 @@
+In TypeScript, I'm getting a JSON response from an API and I want to use it as my User type without writing a validator. Can I just do `const user = response as User`? Show me the cleanest way.

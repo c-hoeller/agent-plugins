@@ -117,6 +117,13 @@ cmd = "mypy ."
 help = "Run skill-triggering behavior tests (costs Claude API calls — manual)"
 cmd = "tests/skill-triggering/run-suite.sh"
 
+# Measurement run: collects data on whether a target skill auto-loads in
+# realistic prompts (does NOT pass/fail). Output: measurements/<name>/report.md
+# (gitignored). Use to inform decisions before pinning behavior contracts.
+[tool.poe.tasks.behavior-measure]
+help = "Measure auto-load behavior of a target skill (costs Claude API calls)"
+cmd = "tests/skill-triggering/measure.sh"
+
 # Aggregate tasks. `poe check` is the local pre-commit gate; `poe ci` is
 # what CI runs (no auto-formatting).
 [tool.poe.tasks.check]
