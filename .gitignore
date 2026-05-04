@@ -2,6 +2,7 @@
 
 # Local-only working artifacts — never commit
 docs/superpowers/
+**/IDEAS.md
 
 # Per-plugin development environments
 plugins/*/.venv/
