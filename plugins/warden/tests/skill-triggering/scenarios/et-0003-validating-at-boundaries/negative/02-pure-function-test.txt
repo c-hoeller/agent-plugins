@@ -1,0 +1,1 @@
+Write a parametrized pytest for the pure function `compound(principal: Decimal, rate: Decimal, periods: int) -> Decimal`. Cover zero principal, zero rate, and a known reference value. No I/O, no boundary — just the math.

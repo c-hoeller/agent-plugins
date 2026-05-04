@@ -1,0 +1,1 @@
+I have a Python helper `def _accumulate(totals, line):` deep inside the billing module — both args come from typed callers. I just want to add type hints (`dict[str, Decimal]` and `InvoiceLine`) for IDE support. No new runtime checks, just annotations.

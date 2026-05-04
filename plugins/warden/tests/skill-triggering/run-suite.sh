@@ -19,15 +19,18 @@ TOTAL=0
 FAILED=0
 SKIPPED=0
 
-for skill_dir in "$SCENARIO_ROOT"/*/; do
-  expected_skill="$(basename "$skill_dir")"
-  positive_dir="${skill_dir}positive"
-  [ -d "$positive_dir" ] || continue
+run_class() {
+  # run_class <expected_skill> <dir> <expectation-flag>
+  local expected_skill="$1"
+  local dir="$2"
+  local flag="$3"
+  [ -d "$dir" ] || return 0
 
-  for prompt in "$positive_dir"/*.txt; do
+  local prompt rc
+  for prompt in "$dir"/*.txt; do
     TOTAL=$((TOTAL + 1))
     set +e
-    "$SCRIPT_DIR/run-test.sh" "$expected_skill" "$prompt"
+    "$SCRIPT_DIR/run-test.sh" "$expected_skill" "$prompt" "$flag"
     rc=$?
     set -e
     case "$rc" in
@@ -38,6 +41,12 @@ for skill_dir in "$SCENARIO_ROOT"/*/; do
       *)  FAILED=$((FAILED + 1)) ;;
     esac
   done
+}
+
+for skill_dir in "$SCENARIO_ROOT"/*/; do
+  expected_skill="$(basename "$skill_dir")"
+  run_class "$expected_skill" "${skill_dir}positive" "--expect-present"
+  run_class "$expected_skill" "${skill_dir}negative" "--expect-absent"
 done
 
 echo

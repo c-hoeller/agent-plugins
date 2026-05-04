@@ -1,0 +1,1 @@
+I'm refactoring a TypeScript class `OrderRouter` and want to make the `routeByZip` method properly private — it's only called from `dispatch` inside the same class. Show me the diff that adds the `private` modifier.

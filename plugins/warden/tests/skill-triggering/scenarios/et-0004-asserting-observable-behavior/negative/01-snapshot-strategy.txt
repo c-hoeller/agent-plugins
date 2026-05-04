@@ -1,0 +1,1 @@
+We're discussing whether to use Jest snapshot tests for our React component library or stick with explicit `getByRole` assertions. What's the tradeoff in terms of review noise when designs change frequently?

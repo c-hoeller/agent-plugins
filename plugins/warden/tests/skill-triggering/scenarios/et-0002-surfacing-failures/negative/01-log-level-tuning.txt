@@ -1,0 +1,1 @@
+Our background ingest worker correctly propagates failures to the orchestrator, but the operator dashboard is noisy. Should the per-batch retry log line be `info` or `debug`? The error path already bubbles up, this is just observability tuning.

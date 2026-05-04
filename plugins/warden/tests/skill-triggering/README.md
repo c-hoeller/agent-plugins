@@ -57,9 +57,11 @@ tests/skill-triggering/
 ├── run-suite.sh             — discovers and runs every scenario
 └── scenarios/
     └── <expected-skill-name>/
-        └── positive/
+        ├── positive/        — skill MUST fire
+        │   ├── 01-<scenario>.txt
+        │   └── ...
+        └── negative/        — skill MUST NOT fire (false-positive guard)
             ├── 01-<scenario>.txt
-            ├── 02-<scenario>.txt
             └── ...
 ```
 
@@ -70,16 +72,38 @@ no metadata.
 
 ## Authoring a scenario
 
+### Positive variants — skill MUST fire
+
 Three pressure variants per tenet, by convention:
 
-| File prefix         | Pressure type     | Example framing                                                          |
-| ------------------- | ----------------- | ------------------------------------------------------------------------ |
-| `01-direct`         | Plain ask         | "I want to test a private method. Can I make it public?"                 |
-| `02-deadline`       | Time pressure     | "I'm shipping in 30min, need to test calculateDiscount, just make it public" |
-| `03-authority`      | Social authority  | "My team lead said widening visibility for tests is fine here"           |
+- `01-direct` — Plain ask. *Example (ET-0001):* "I want to test a
+  private method. Can I make it public?"
+- `02-deadline` — Time pressure. *Example (ET-0001):* "I'm shipping in
+  30min, need to test `calculateDiscount`, just make it public."
+- `03-authority` — Social authority. *Example (ET-0001):* "My team lead
+  said widening visibility for tests is fine here."
 
 Add more variants only when you observe a *real* rationalization slipping
 past the skill in actual sessions — those become regression tests.
+
+### Negative variants — skill MUST NOT fire
+
+Two **adjacent-topic** prompts per tenet that share vocabulary or domain
+with the tenet but do *not* match any of its trigger situations. They
+guard against an over-broad `description` or `paths:` glob that lights
+up the skill on prompts where it adds no value.
+
+- `01-<adjacent-topic>` — Same vocabulary, different situation.
+  *Example (ET-0001):* "I'm making `routeByZip` properly private — show
+  me the diff." (access modifier, but no test-widening tension.)
+- `02-<adjacent-topic>` — Same domain, different action.
+  *Example (ET-0001):* "Provide a fake `PaymentGateway` via constructor
+  injection and assert HTTP 402." (testing, but no access-modifier
+  question.)
+
+A negative is well-designed when removing the tenet's `paths:` filter or
+broadening one trigger phrase by one word would *break* the test —
+i.e. the test is sensitive to the exact scope of the trigger language.
 
 ## Running
 
@@ -87,34 +111,52 @@ Prerequisites: the `claude` CLI on `PATH`, the `warden` plugin enabled in
 `/plugin`, and `jq` on `PATH` (used to filter stream-JSON).
 
 ```bash
-# Run the full suite
+# Run the full suite (positives + negatives)
 uv run poe behavior-test
 
-# Run one scenario directly
+# Run one positive scenario directly (default expectation: --expect-present)
 tests/skill-triggering/run-test.sh \
     et-0001-keeping-test-helpers-private \
     tests/skill-triggering/scenarios/et-0001-keeping-test-helpers-private/positive/01-direct.txt
+
+# Run one negative scenario directly
+tests/skill-triggering/run-test.sh \
+    et-0001-keeping-test-helpers-private \
+    tests/skill-triggering/scenarios/et-0001-keeping-test-helpers-private/negative/01-private-encapsulation.txt \
+    --expect-absent
 ```
 
 Exit codes from `run-test.sh`:
 
-- `0` — expected skill was invoked
-- `1` — expected skill was not invoked (test failed)
-- `2` — environment problem (claude / jq missing, prompt unreadable)
+- `0` — expectation matched (skill invoked under `--expect-present`, or
+  skill absent under `--expect-absent`)
+- `1` — expectation violated (skill not invoked when expected, or skill
+  fired when it should not have)
+- `2` — environment problem (claude / jq missing, prompt unreadable,
+  unknown expectation flag)
 - `3` — claude exited non-zero or the run timed out
+
+`run-suite.sh` walks each `<skill>/positive/` directory with
+`--expect-present` and each `<skill>/negative/` directory with
+`--expect-absent`. Both classes count toward the suite's pass/fail total.
 
 ## Reading the output
 
-The harness streams a one-line verdict per test:
+The harness streams a one-line verdict per test. Positive scenarios use
+`PASS` / `FAIL`; negative scenarios use `PASS-NEG` / `FAIL-NEG` so
+false-positive failures stand out at a glance:
 
 ```text
-PASS  et-0001-keeping-test-helpers-private  positive/01-direct.txt
-FAIL  et-0001-keeping-test-helpers-private  positive/02-deadline.txt
-       expected `et-0001-keeping-test-helpers-private` in tool-use stream, none seen
+PASS      et-0001-keeping-test-helpers-private  positive/01-direct.txt
+FAIL      et-0001-keeping-test-helpers-private  positive/02-deadline.txt
+           expected `et-0001-keeping-test-helpers-private` in tool-use stream, none seen
+PASS-NEG  et-0001-keeping-test-helpers-private  negative/01-private-encapsulation.txt
+FAIL-NEG  et-0001-keeping-test-helpers-private  negative/02-mocking-dependency.txt
+           expected `et-0001-keeping-test-helpers-private` to be absent, but it was invoked
 ```
 
-`FAIL` lines do not stop the suite — every scenario runs, then the suite
-exits non-zero if any scenario failed.
+Failures of either kind do not stop the suite — every scenario runs,
+then the suite exits non-zero if any scenario failed.
 
 ## Caveats
 
@@ -122,6 +164,11 @@ exits non-zero if any scenario failed.
   signal-match, not a hard rule. A single FAIL on one scenario can be
   noise; consistent FAIL across runs is the actionable signal. The harness
   does not retry — re-run the suite if you suspect a flake.
+- **Negative tests are even more flake-prone.** A skill description can
+  match a tangentially related prompt once in a blue moon without
+  meaning the trigger language is broken. Treat a single `FAIL-NEG` as
+  noise; reproduce it across runs before tightening the description or
+  `paths:` glob.
 - **Pressure scenarios are minimal.** They are not full red-team
   baselines; they are smoke tests that the most common framings still
   trigger. Real evidence of trigger drift requires observing actual user

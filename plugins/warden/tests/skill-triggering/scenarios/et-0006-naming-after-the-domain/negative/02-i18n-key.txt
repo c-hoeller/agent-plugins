@@ -1,0 +1,1 @@
+We're adding German translations to our React app. Should our i18n keys be flat (`checkout.button.submit`) or nested objects? And should the keys be English-source or feature-coded like `CHK_001`?

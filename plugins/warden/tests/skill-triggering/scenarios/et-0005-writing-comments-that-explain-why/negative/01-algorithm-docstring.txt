@@ -1,0 +1,1 @@
+I'm implementing Reservoir Sampling (Algorithm R) in Python and want to add a docstring that explains *why* the swap-with-probability-k/i step preserves uniform selection — that property is genuinely non-obvious from reading the code. Help me draft a clear explanation of the invariant.

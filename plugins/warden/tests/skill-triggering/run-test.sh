@@ -1,20 +1,31 @@
 #!/usr/bin/env bash
 # Run one skill-triggering behavior test.
 #
-# Usage: run-test.sh <expected-skill-name> <prompt-file>
+# Usage: run-test.sh <expected-skill-name> <prompt-file> [--expect-present|--expect-absent]
 #
 # Invokes `claude -p` headless with the prompt, captures the stream-JSON
-# tool-use trail, and exits 0 iff the expected skill was seen invoked.
+# tool-use trail, and exits 0 iff the expectation matches:
+#   --expect-present (default): the skill MUST appear in the tool-use stream
+#   --expect-absent:            the skill MUST NOT appear (false-positive guard)
 # See tests/skill-triggering/README.md for exit-code semantics.
 set -euo pipefail
 
-if [ $# -ne 2 ]; then
-  echo "usage: $0 <expected-skill-name> <prompt-file>" >&2
+if [ $# -lt 2 ] || [ $# -gt 3 ]; then
+  echo "usage: $0 <expected-skill-name> <prompt-file> [--expect-present|--expect-absent]" >&2
   exit 2
 fi
 
 EXPECTED_SKILL="$1"
 PROMPT_FILE="$2"
+EXPECTATION="${3:---expect-present}"
+
+case "$EXPECTATION" in
+  --expect-present|--expect-absent) ;;
+  *)
+    echo "run-test: unknown expectation \`$EXPECTATION\` (use --expect-present or --expect-absent)" >&2
+    exit 2
+    ;;
+esac
 
 if ! command -v claude >/dev/null 2>&1; then
   echo "run-test: \`claude\` CLI not on PATH — install Claude Code or adjust PATH" >&2
@@ -80,11 +91,23 @@ MATCH="$(
   ' < "$RAW_OUT" 2>/dev/null | grep -F "$EXPECTED_SKILL" | head -1 || true
 )"
 
-if [ -n "$MATCH" ]; then
-  echo "PASS  $EXPECTED_SKILL  ${PROMPT_FILE##*/scenarios/}"
-  exit 0
+REL_PROMPT="${PROMPT_FILE##*/scenarios/}"
+
+if [ "$EXPECTATION" = "--expect-present" ]; then
+  if [ -n "$MATCH" ]; then
+    echo "PASS  $EXPECTED_SKILL  $REL_PROMPT"
+    exit 0
+  fi
+  echo "FAIL  $EXPECTED_SKILL  $REL_PROMPT"
+  echo "       expected \`$EXPECTED_SKILL\` in tool-use stream, none seen"
+  exit 1
 fi
 
-echo "FAIL  $EXPECTED_SKILL  ${PROMPT_FILE##*/scenarios/}"
-echo "       expected \`$EXPECTED_SKILL\` in tool-use stream, none seen"
+# --expect-absent: skill MUST NOT have fired
+if [ -z "$MATCH" ]; then
+  echo "PASS-NEG  $EXPECTED_SKILL  $REL_PROMPT"
+  exit 0
+fi
+echo "FAIL-NEG  $EXPECTED_SKILL  $REL_PROMPT"
+echo "       expected \`$EXPECTED_SKILL\` to be absent, but it was invoked"
 exit 1

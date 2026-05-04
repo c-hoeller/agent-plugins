@@ -1,0 +1,1 @@
+Design a TypeScript discriminated union for the result of `parseTimestamp(input: string)` — either `{ kind: "ok", value: Date }` or `{ kind: "err", reason: "empty" | "format" | "range" }`. Show me how a caller would narrow on `kind` to access `value`.

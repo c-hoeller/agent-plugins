@@ -1,0 +1,1 @@
+In my Java test for `CheckoutController`, I want to provide a fake `PaymentGateway` via constructor injection and assert the controller returns HTTP 402 when the gateway reports `Declined`. Show me the JUnit test.

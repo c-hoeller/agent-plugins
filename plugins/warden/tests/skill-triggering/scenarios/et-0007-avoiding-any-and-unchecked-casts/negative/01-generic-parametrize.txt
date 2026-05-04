@@ -1,0 +1,1 @@
+I have a TypeScript utility `function pluck(items, key)` that takes any array and a key and returns the values. I want to make it generic so the return type is properly inferred — `pluck<T, K extends keyof T>(items: T[], key: K): T[K][]`. Show me the cleanest signature plus one usage example.

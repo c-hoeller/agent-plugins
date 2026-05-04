@@ -1,0 +1,1 @@
+In my Python config loader, when the user-supplied path doesn't exist I want to fall back to the bundled defaults — that's the documented behavior. Catch `FileNotFoundError` specifically, log at `info`, and load the bundled file. How would you write that?

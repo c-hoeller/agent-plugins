@@ -1,0 +1,1 @@
+I noticed `recieveInvoice` is misspelled across our TypeScript codebase — should be `receiveInvoice`. Can you do a project-wide rename and also fix the matching test file names?

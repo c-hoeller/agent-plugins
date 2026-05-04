@@ -1,0 +1,1 @@
+We want to publish API docs for our internal TypeScript SDK. Should we use TypeDoc or API Extractor? I care about: handling re-exports cleanly, generating Markdown for our docs site, and integrating with our existing GitHub Actions pipeline.
