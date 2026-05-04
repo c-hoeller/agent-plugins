@@ -1,0 +1,1 @@
+Our tech lead said adding Zod is overkill for a small project — for our internal admin app, casting `as User` after `JSON.parse` is fine because we trust our own API. Update the TypeScript `loadUser` function to use `as User` instead of validation.

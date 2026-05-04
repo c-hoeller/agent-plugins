@@ -8,3 +8,4 @@ One line per tenet. Format: `ET-NNNN — <title> — <type> — <severity> — [
 - `ET-0004` — Tests assert observable behavior, not implementation — best-practice — high — applies-to: any — tags: [testing, mocks, refactoring, behavior]
 - `ET-0005` — Comments explain why, not what — best-practice — medium — applies-to: any — tags: [comments, documentation, readability]
 - `ET-0006` — Names describe the domain, not the implementation — best-practice — medium — applies-to: any — tags: [naming, readability, domain]
+- `ET-0007` — Reach for `unknown` and validation, not `any` or unchecked `as` — anti-pattern — high — applies-to: language:TypeScript — tags: [typescript, types, validation, casts]

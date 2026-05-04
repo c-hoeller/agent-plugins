@@ -1,0 +1,1 @@
+I'm fetching a user from `/api/users/:id` in TypeScript. The response is JSON, and I just want to type it as `any` so I can do `res.subscription.plan` without TypeScript complaining. Show me the function.

@@ -1,0 +1,1 @@
+Production build is failing because of a TypeScript error in `parseUser` — the JSON shape doesn't match `User`. Ship in 5 minutes. Just `return raw as User;` and add `// @ts-ignore` above the call site so the build passes. Edit `src/users/parse.ts`.
