@@ -72,6 +72,11 @@ def main() -> int:
     if actual_index != expected_index:
         mismatches.append(_diff("build/index.md", expected_index, actual_index))
 
+    expected_index_json = warden_lib.render_index_json(tenets)
+    actual_index_json = (build_dir / "index.json").read_text(encoding="utf-8")
+    if actual_index_json != expected_index_json:
+        mismatches.append(_diff("build/index.json", expected_index_json, actual_index_json))
+
     expected_skill_dirs: set[str] = set()
     for t in tenets:
         skill_name, expected_content = warden_lib.render_skill_for_tenet(t)

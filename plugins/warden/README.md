@@ -73,7 +73,7 @@ plugins/warden/
 │   └── et-NNNN-<slug>/           # generated: one auto-loadable skill per tenet
 ├── tenets/                       # source of truth — one file per tenet
 ├── templates/ET-NNNN-template.md # starting point for a new tenet
-├── build/                        # generated, committed (charter + index)
+├── build/                        # generated, committed (charter + index.md + index.json)
 ├── scripts/                      # build/validation tooling — see CONTRIBUTING.md
 ├── tests/                        # pytest suite
 └── pyproject.toml                # uv-managed deps + tool config

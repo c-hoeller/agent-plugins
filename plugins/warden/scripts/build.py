@@ -71,6 +71,9 @@ def main() -> int:
     index_path = build_dir / "index.md"
     index_path.write_text(warden_lib.render_index(tenets), encoding="utf-8")
 
+    index_json_path = build_dir / "index.json"
+    index_json_path.write_text(warden_lib.render_index_json(tenets), encoding="utf-8")
+
     _clean_generated_skills(skills_dir)
     for t in tenets:
         skill_name, content = warden_lib.render_skill_for_tenet(t)
@@ -81,7 +84,7 @@ def main() -> int:
     tier1_count = sum(1 for t in tenets if t.tier == 1)
     print(
         f"build: OK — wrote {charter_md.name} + {charter_json.name} "
-        f"(tier-1: {tier1_count}) and {index_path.name} "
+        f"(tier-1: {tier1_count}), {index_path.name} + {index_json_path.name} "
         f"({len(tenets)} total tenets), generated {len(tenets)} tenet skill(s)"
     )
     return 0

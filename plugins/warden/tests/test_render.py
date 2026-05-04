@@ -27,6 +27,54 @@ def test_render_index_is_sorted_by_id(make_tenet, tenets_dir: Path):
     assert pos_first < pos_second
 
 
+def test_render_index_json_emits_structured_tenets(make_tenet, tenets_dir: Path):
+    make_tenet(
+        id="ET-0001",
+        slug="a",
+        title="First",
+        tags=["testing", "oop"],
+        applies_to={"language": "TypeScript"},
+    )
+    make_tenet(id="ET-0002", slug="b", title="Second", tier=2, severity="low")
+    # ET-0002 is tier 2 — needs paths to be valid; inject directly.
+    p = tenets_dir / "ET-0002-b.md"
+    p.write_text(
+        p.read_text(encoding="utf-8").replace("tier: 2", 'tier: 2\npaths:\n  - "**/*.py"', 1),
+        encoding="utf-8",
+    )
+    tenets = warden_lib.load_all(tenets_dir)
+    payload = json.loads(warden_lib.render_index_json(tenets))
+
+    assert payload["schema_version"] == 1
+    assert [t["id"] for t in payload["tenets"]] == ["ET-0001", "ET-0002"]
+
+    first = payload["tenets"][0]
+    assert first["title"] == "First"
+    assert first["tags"] == ["testing", "oop"]
+    assert first["applies_to"] == {"language": "TypeScript"}
+    assert first["skill"] == "et-0001-a"
+
+    second = payload["tenets"][1]
+    assert second["tier"] == 2
+    assert second["paths"] == ["**/*.py"]
+
+
+def test_render_index_json_supports_jq_style_tag_filter(make_tenet, tenets_dir: Path):
+    """Demonstrates the consumer pattern: filter tenets by tag in pure JSON.
+
+    `lookup-tenet` documents this pattern; the test pins it as a contract
+    so a future schema change cannot quietly break the documented query.
+    """
+    make_tenet(id="ET-0001", slug="a", tags=["testing", "oop"])
+    make_tenet(id="ET-0002", slug="b", tags=["naming"])
+    make_tenet(id="ET-0003", slug="c", tags=["testing", "mocks"])
+    tenets = warden_lib.load_all(tenets_dir)
+    payload = json.loads(warden_lib.render_index_json(tenets))
+
+    testing = [t["id"] for t in payload["tenets"] if "testing" in t["tags"]]
+    assert testing == ["ET-0001", "ET-0003"]
+
+
 def test_render_charter_lists_tier1_tenets_only_in_tier1_section(make_tenet, tenets_dir: Path):
     make_tenet(id="ET-0001", slug="a", tier=1, title="Tier1 tenet")
     make_tenet(id="ET-0002", slug="b", tier=2, title="Tier2 tenet")

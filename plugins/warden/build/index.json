@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "tenets": [
+    {
+      "id": "ET-0001",
+      "title": "Never lower access modifiers for testing",
+      "type": "anti-pattern",
+      "severity": "high",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.java",
+        "**/*.kt",
+        "**/*.kts",
+        "**/*.swift",
+        "**/*.cs",
+        "**/*.scala",
+        "**/*.dart"
+      ],
+      "tags": [
+        "testing",
+        "encapsulation",
+        "oop"
+      ],
+      "related": [],
+      "since": "0.1.0",
+      "skill": "et-0001-keeping-test-helpers-private"
+    },
+    {
+      "id": "ET-0002",
+      "title": "Never silently swallow failures",
+      "type": "anti-pattern",
+      "severity": "high",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "error-handling",
+        "observability",
+        "reliability"
+      ],
+      "related": [],
+      "since": "0.1.0",
+      "skill": "et-0002-surfacing-failures"
+    },
+    {
+      "id": "ET-0003",
+      "title": "Validate at trust boundaries, trust the core",
+      "type": "best-practice",
+      "severity": "high",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "validation",
+        "boundaries",
+        "defensive-programming",
+        "types"
+      ],
+      "related": [],
+      "since": "0.1.0",
+      "skill": "et-0003-validating-at-boundaries"
+    },
+    {
+      "id": "ET-0004",
+      "title": "Tests assert observable behavior, not implementation",
+      "type": "best-practice",
+      "severity": "high",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "testing",
+        "mocks",
+        "refactoring",
+        "behavior"
+      ],
+      "related": [
+        "ET-0001"
+      ],
+      "since": "0.1.0",
+      "skill": "et-0004-asserting-observable-behavior"
+    },
+    {
+      "id": "ET-0005",
+      "title": "Comments explain why, not what",
+      "type": "best-practice",
+      "severity": "medium",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "comments",
+        "documentation",
+        "readability"
+      ],
+      "related": [],
+      "since": "0.1.0",
+      "skill": "et-0005-writing-comments-that-explain-why"
+    },
+    {
+      "id": "ET-0006",
+      "title": "Names describe the domain, not the implementation",
+      "type": "best-practice",
+      "severity": "medium",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "naming",
+        "readability",
+        "domain"
+      ],
+      "related": [],
+      "since": "0.1.0",
+      "skill": "et-0006-naming-after-the-domain"
+    },
+    {
+      "id": "ET-0007",
+      "title": "Reach for `unknown` and validation, not `any` or unchecked `as`",
+      "type": "anti-pattern",
+      "severity": "high",
+      "tier": 2,
+      "applies_to": {
+        "language": "TypeScript"
+      },
+      "paths": [
+        "**/*.ts",
+        "**/*.tsx"
+      ],
+      "tags": [
+        "typescript",
+        "types",
+        "validation",
+        "casts"
+      ],
+      "related": [
+        "ET-0003"
+      ],
+      "since": "0.1.0",
+      "skill": "et-0007-avoiding-any-and-unchecked-casts"
+    }
+  ]
+}

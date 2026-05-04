@@ -47,28 +47,60 @@ if [ -z "$PLUGIN_ROOT" ] || [ ! -d "$PLUGIN_ROOT/build" ]; then
 fi
 ```
 
-Once `$PLUGIN_ROOT` is known:
+Once `$PLUGIN_ROOT` is known, two index forms are available:
 
-1. **Read the index.** `$PLUGIN_ROOT/build/index.md` lists every tenet:
+- `$PLUGIN_ROOT/build/index.md` — one-line-per-tenet, human-scannable.
+- `$PLUGIN_ROOT/build/index.json` — structured. Use this for any
+  query that involves filtering by tag, language, framework, tier, or
+  severity. As the catalog grows past ~15 tenets, the markdown index
+  is no longer scan-friendly; the JSON index is.
 
-   ```text
-   ET-NNNN — <title> — <type> — <severity> — applies-to: ... — tags: [...]
-   ```
+### Discovery patterns
 
-   Grep / scan it for the ID, tag, or keyword you are after. The index
-   is intentionally one-line-per-tenet and short enough to scan in full.
+Every query below assumes `INDEX="$PLUGIN_ROOT/build/index.json"` and
+that `jq` is on PATH (Claude Code ships with it).
 
-2. **Read the source file** for the full record:
-   `$PLUGIN_ROOT/tenets/<ID>-*.md`. Contains:
-   - `Rule` — the imperative statement
-   - `Why` — root cause and consequence
-   - `Bad Example` / `Good Example` — minimal code
-   - `Exceptions` — when the tenet legitimately does not apply
-   - `triggers` (frontmatter) — the situations the auto-load skill matches
+```bash
+# By tag — "tenets that touch testing"
+jq -r '.tenets[] | select(.tags | index("testing")) | .id + " — " + .title' "$INDEX"
 
-   The same content is also available at
-   `$PLUGIN_ROOT/skills/et-<id-lower>-*/SKILL.md` if you prefer the
-   rendered skill form.
+# By language — "tenets that apply to TypeScript code"
+jq -r '.tenets[]
+  | select(.applies_to == "any" or .applies_to.language == "TypeScript")
+  | .id + " — " + .title' "$INDEX"
+
+# By tier — "all tier 1 tenets, listed in the always-on charter"
+jq -r '.tenets[] | select(.tier == 1) | .id + " — " + .title' "$INDEX"
+
+# By severity — "critical or high tenets only"
+jq -r '.tenets[] | select(.severity == "critical" or .severity == "high") | .id' "$INDEX"
+
+# Find a specific tenet by ID and print its skill name
+jq -r '.tenets[] | select(.id == "ET-0001") | .skill' "$INDEX"
+
+# Free-text search across titles and tags
+jq -r --arg q "validation" '
+  .tenets[]
+  | select((.title | ascii_downcase | contains($q)) or (.tags | index($q)))
+  | .id + " — " + .title' "$INDEX"
+```
+
+If `jq` is unavailable for some reason, fall back to grepping
+`build/index.md`:
+
+```bash
+grep -E "tags:.*testing" "$PLUGIN_ROOT/build/index.md"
+```
+
+### Reading the full tenet body
+
+Once you have an ID, read either:
+
+- `$PLUGIN_ROOT/tenets/<ID>-*.md` — the source file, with full
+  `Rule` / `Why` / `Bad Example` / `Good Example` / `Exceptions`,
+  `triggers`, and any `Rationalizations`.
+- `$PLUGIN_ROOT/skills/et-<id-lower>-*/SKILL.md` — the rendered skill
+  form, identical content with a generated marker on top.
 
 ## Applying a tenet
 

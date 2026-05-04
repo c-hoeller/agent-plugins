@@ -573,3 +573,37 @@ def render_index(tenets: Iterable[Tenet]) -> str:
 def _inline(text: str) -> str:
     """Collapse multi-line prose into a single paragraph for bundle labels."""
     return " ".join(line.strip() for line in text.splitlines() if line.strip())
+
+
+def render_index_json(tenets: Iterable[Tenet]) -> str:
+    """Generate build/index.json — structured tenet metadata for `lookup-tenet`.
+
+    Mirrors build/index.md but in a shape `jq` (or any JSON consumer) can
+    filter against. Discovery on a 30-50 tenet catalog needs per-tag and
+    per-language queries; line-grepping the markdown index doesn't scale.
+
+    Schema is intentionally flat — one object per tenet, every queryable
+    field at the top level, no nesting beyond `applies_to`. Schema version
+    is embedded so consumers can detect breaking changes.
+    """
+    sorted_tenets = sorted(tenets, key=lambda t: t.id)
+    payload = {
+        "schema_version": 1,
+        "tenets": [
+            {
+                "id": t.id,
+                "title": t.title,
+                "type": t.type,
+                "severity": t.severity,
+                "tier": t.tier,
+                "applies_to": t.applies_to,
+                "paths": t.paths,
+                "tags": t.tags,
+                "related": t.related,
+                "since": t.since,
+                "skill": _skill_name_for(t),
+            }
+            for t in sorted_tenets
+        ],
+    }
+    return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
