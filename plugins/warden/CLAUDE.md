@@ -80,6 +80,16 @@ the build would emit. The CI gate `poe ci` enforces this via
 
 ## Tenet design rules (apply when adding/editing tenets)
 
+- **Tenets only cover what linters/analyzers cannot.** Before adding a
+  tenet, check whether a robust static-analysis rule already enforces
+  the same constraint (e.g. `ruff B006` for mutable default arguments,
+  `gitleaks` for secrets, Roslyn `CA2000` for missing `Dispose`). If a
+  linter handles it deterministically, **do not add a tenet** — the
+  linter is faster, cheaper, and runs without an agent in the loop.
+  Warden's value is judgement-heavy rules and rules that the agent
+  should follow at *generation* time, not patterns a CI gate can flag
+  post-hoc. When a linter handles the rule *partially*, the tenet must
+  cover the judgement gap, not the pattern the linter already catches.
 - **Triggers describe situations, not topics.** ✅ "keeping a member
   private when a test wants to call it directly" — ❌ "encapsulation".
 - **Triggers use positive framing**, even when the Rule is negative.
