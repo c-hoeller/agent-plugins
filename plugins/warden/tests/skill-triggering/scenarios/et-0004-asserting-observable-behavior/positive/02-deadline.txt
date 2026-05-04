@@ -1,0 +1,1 @@
+Sprint review tomorrow — coverage is at 78% and we need 80%. Quickest path: add unit tests for `OrderService.Submit` that mock `IOrderRepo` and verify `Save(...)` was called with the right order. Less work than wiring up a real fake. Generate the C# tests.

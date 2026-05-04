@@ -20,3 +20,4 @@ This session is governed by Warden Engineering Tenets (ET-NNNN). Tenets are **bi
 - `ET-0001` — Never lower access modifiers for testing [high] → skill `et-0001-keeping-test-helpers-private`
 - `ET-0002` — Never silently swallow failures [high] → skill `et-0002-surfacing-failures`
 - `ET-0003` — Validate at trust boundaries, trust the core [high] → skill `et-0003-validating-at-boundaries`
+- `ET-0004` — Tests assert observable behavior, not implementation [high] → skill `et-0004-asserting-observable-behavior`

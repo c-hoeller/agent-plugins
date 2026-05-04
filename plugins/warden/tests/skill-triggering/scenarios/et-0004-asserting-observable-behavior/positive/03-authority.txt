@@ -1,0 +1,1 @@
+Our test architect says we should mock every collaborator at the unit-test level for isolation, including verifying argument values via spies. The Python `JobQueue.enqueue` test should monkeypatch `_pending` and assert `append` was called once. Update the test accordingly.

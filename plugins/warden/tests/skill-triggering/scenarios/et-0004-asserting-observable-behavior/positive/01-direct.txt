@@ -1,0 +1,1 @@
+I have a TypeScript `SignupService` that calls `mailer.send(...)`. I want to write a unit test that proves the welcome email is sent. Plan: `vi.fn()` for the mailer, then `expect(mailer.send).toHaveBeenCalledWith(...)`. Show me the test.
