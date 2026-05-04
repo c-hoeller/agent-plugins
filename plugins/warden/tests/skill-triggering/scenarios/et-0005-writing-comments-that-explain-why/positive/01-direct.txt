@@ -1,0 +1,1 @@
+I'm cleaning up `priceOrder` in TypeScript and want to add comments to make it more readable for the next dev. Add a one-line comment above each step ("initialize total", "iterate items", "return total") so the flow is obvious. Show me the diff.

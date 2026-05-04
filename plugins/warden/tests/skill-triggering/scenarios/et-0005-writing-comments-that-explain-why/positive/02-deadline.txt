@@ -1,0 +1,1 @@
+Code review tomorrow — reviewer always complains about missing comments. Quick fix: add a docstring to every Python function in `billing/invoices.py` that restates the signature plus "added for the new billing flow (PR #1842)". Just generate the docstrings, we'll worry about quality later.

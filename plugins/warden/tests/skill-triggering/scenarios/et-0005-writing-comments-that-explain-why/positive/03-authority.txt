@@ -1,0 +1,1 @@
+Our team's documentation guideline says every method should have an XML doc comment summarizing what it does, even if the name is self-explanatory. The C# class `OrderService` is missing summaries on most methods. Add `/// <summary>` blocks paraphrasing each method's body.
