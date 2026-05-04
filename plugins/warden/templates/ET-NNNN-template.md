@@ -76,8 +76,18 @@ forbidden / required and what is not.>
 
 ## Why
 
-<Root cause and consequence. Explain *why* the rule exists in terms of
-real failure modes, not abstract principles. 2–4 sentences.>
+<Result + cost, not abstract principle. Name the concrete, observable
+damage that happens when the Rule is broken: which class of bug appears,
+how many months later, and what becomes hard to change because of it.
+
+Pattern: `<violation> → <symptom that surfaces during refactor / review
+/ incident> → <cost: who pays, in what currency>`.
+
+Avoid: "this is bad design", "leaks abstractions", "violates SRP" — those
+are restatements of the Rule, not reasons. If you can't describe a real
+failure mode, the tenet is probably advice, not a binding rule.
+
+2–4 sentences.>
 
 ## Bad Example
 
@@ -110,11 +120,21 @@ saying so — do not omit the section.>
 
 ## Rationalizations
 
-<OPTIONAL section. Use it for tenets that face predictable loophole
-arguments. Each row should pair the excuse with the *real* underlying
-situation and the correct path forward. Drop the section entirely if
-the tenet has no recurring rationalizations — empty rows are noise.>
+<OPTIONAL section. Each entry MUST be a verbatim excuse you have
+**actually observed** — from a Claude session transcript, a code review
+comment, a behavior-test failure, or a real PR description. Hypothetical
+or "this could plausibly happen" entries dilute the signal: the agent
+has no way to recognise a rationalization it never produced.
 
-- **"<the excuse, in the agent's or user's voice>"** — <the reality
-  underneath the excuse, in one sentence>. <The correct action.>
-- **"<another excuse>"** — <reality>. <correct action>.
+Source these from `tests/skill-triggering/scenarios/<this-skill>/`
+prompts that triggered the rationalization, or from real-session logs
+where the tenet was almost skipped. If you have not seen a recurring
+excuse for this rule, drop the section entirely — empty rows are noise.
+
+Each row pairs the verbatim excuse with the underlying reality and the
+correct action.>
+
+- **"_the excuse, in the agent's or user's voice — verbatim_"** —
+  _the reality underneath the excuse, in one sentence_.
+  _The correct action._
+- **"_another excuse — verbatim_"** — _reality_. _correct action_.
