@@ -23,3 +23,5 @@ This session is governed by Warden Engineering Tenets (ET-NNNN). Tenets are **bi
 - `ET-0004` — Tests assert observable behavior, not implementation [high] → skill `et-0004-asserting-observable-behavior`
 - `ET-0005` — Comments explain why, not what [medium] → skill `et-0005-writing-comments-that-explain-why`
 - `ET-0006` — Names describe the domain, not the implementation [medium] → skill `et-0006-naming-after-the-domain`
+
+## Tier 2 — context-specific (auto-load via triggers, or browse via `lookup-tenet`; 1 total)
