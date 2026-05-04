@@ -1,0 +1,1 @@
+Our Python style guide (written by the team lead) says every dict-shaped argument should be suffixed with `_dict` and every list-shaped argument with `_list` so the type is obvious from the name. Update `settle_invoices(customers, orders)` to follow the convention.

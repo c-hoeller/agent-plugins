@@ -1,0 +1,1 @@
+Quick refactor before the demo at 3pm — I'm extracting customer logic from `OrderService.cs` into a new class. I'll call it `CustomerDataManager` with a `List<Customer> _customerList` field and a `ProcessCustomer(Customer customerObj)` method. Generate the class skeleton.

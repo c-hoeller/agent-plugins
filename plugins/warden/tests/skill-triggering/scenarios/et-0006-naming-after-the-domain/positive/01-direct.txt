@@ -1,0 +1,1 @@
+I'm writing a TypeScript function that takes a list of orders and returns the total. I want to call the parameter `orderArray` so it's clear it's an array, and the function `runOrderProcessor` so it's clear what it does. Generate the function signature.
