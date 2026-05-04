@@ -2,6 +2,7 @@
 name: et-0002-surfacing-failures
 description: Use when handling an error you do not know how to recover from in the current scope; writing a `catch` / `except` / `.catch()` block that does nothing or only logs; reviewing a diff that adds a try/catch around new code without rethrow or remediation; deciding what to do with a Promise/Task whose failure path has no obvious owner.
 ---
+<!-- generated from tenets/ET-0002-surfacing-failures.md by `uv run poe build` — do not edit by hand. -->
 
 # ET-0002 — Never silently swallow failures
 

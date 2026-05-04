@@ -2,6 +2,7 @@
 name: et-0004-asserting-observable-behavior
 description: Use when writing a test that verifies a mock was called instead of the effect the call produced; reaching for a spy/stub/inspector to peek at internal state from a test; reviewing a test that breaks every time the production code is refactored; deciding what to assert about a function whose contract is "given X, the world looks like Y".
 ---
+<!-- generated from tenets/ET-0004-asserting-observable-behavior.md by `uv run poe build` — do not edit by hand. -->
 
 # ET-0004 — Tests assert observable behavior, not implementation
 

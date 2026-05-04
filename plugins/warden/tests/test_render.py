@@ -104,6 +104,21 @@ def test_render_skill_for_tenet_body_contains_all_required_sections(make_tenet, 
         assert f"## {section}" in content
 
 
+def test_render_skill_emits_generated_marker(make_tenet, tenets_dir: Path):
+    # The marker must point at the source path so a human inspecting the
+    # generated skill can find the file to edit, and must mention the
+    # build command so they know how to regenerate after editing.
+    make_tenet(id="ET-0001", slug="my-tenet")
+    tenets = warden_lib.load_all(tenets_dir)
+    _, content = warden_lib.render_skill_for_tenet(tenets[0])
+    body = content.split("---", 2)[2]
+    first_body_line = next(line for line in body.splitlines() if line.strip())
+    assert first_body_line.startswith("<!--")
+    assert "generated from tenets/ET-0001-my-tenet.md" in first_body_line
+    assert "uv run poe build" in first_body_line
+    assert "do not edit by hand" in first_body_line
+
+
 def test_render_skill_description_truncates_at_hard_cap(make_tenet, tenets_dir: Path):
     long_trigger = "x" * 195  # under per-trigger 200 cap, but enough to bust the total
     make_tenet(triggers=[long_trigger] * 10)

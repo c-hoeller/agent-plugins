@@ -3,6 +3,7 @@ name: et-0007-avoiding-any-and-unchecked-casts
 description: Use when typing a value as `any` to make a TypeScript error go away; writing `as Foo` to coerce a value of unknown shape into a domain type; turning untyped JSON / network / form data into a typed value without runtime validation; silencing a type error with `// @ts-ignore` or `// @ts-expect-error` to keep the build green.
 paths: ["**/*.ts", "**/*.tsx"]
 ---
+<!-- generated from tenets/ET-0007-avoiding-any-and-unchecked-casts.md by `uv run poe build` — do not edit by hand. -->
 
 # ET-0007 — Reach for `unknown` and validation, not `any` or unchecked `as`
 

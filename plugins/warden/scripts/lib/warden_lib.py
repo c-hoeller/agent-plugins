@@ -500,8 +500,16 @@ def render_skill_for_tenet(tenet: Tenet) -> tuple[str, str]:
         # always sufficient.
         quoted = ", ".join(json.dumps(p) for p in tenet.paths)
         fm.append(f"paths: [{quoted}]")
-    fm.extend(["---", "", ""])
+    fm.extend(["---", ""])
     body: list[str] = []
+    # Generated-file marker. Discoverable by anyone reading the skill from
+    # disk (via `find`, IDE search, etc.) without needing to know the
+    # repo's CLAUDE.md "Hard rules" section that documents the contract.
+    body.append(
+        f"<!-- generated from {tenet.path.parent.name}/{tenet.path.name} "
+        f"by `uv run poe build` — do not edit by hand. -->"
+    )
+    body.append("")
     body.append(f"# {tenet.id} — {tenet.title}")
     body.append("")
     body.append(f"_Type: {tenet.type} · Severity: {tenet.severity} · Tier: {tenet.tier}_")

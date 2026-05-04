@@ -3,6 +3,7 @@ name: et-0001-keeping-test-helpers-private
 description: Use when keeping a member private when a test wants to call it directly; testing a class whose helper is private/protected/internal and the test cannot reach it; deciding how to test logic that currently lives behind a `private`/`protected` modifier; reviewing a diff that widens an access modifier with a justification referencing tests.
 paths: ["**/*.ts", "**/*.tsx", "**/*.java", "**/*.kt", "**/*.kts", "**/*.swift", "**/*.cs", "**/*.scala", "**/*.dart"]
 ---
+<!-- generated from tenets/ET-0001-keeping-test-helpers-private.md by `uv run poe build` — do not edit by hand. -->
 
 # ET-0001 — Never lower access modifiers for testing
 

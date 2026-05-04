@@ -2,6 +2,7 @@
 name: et-0003-validating-at-boundaries
 description: Use when adding a null/range/format check inside an internal helper that already receives a typed argument; deciding where to validate input that crosses a trust boundary (HTTP handler, CLI args, queue message, deserializer); reviewing a diff that scatters defensive guards through the call graph below the entry point; writing parsing/coercion logic that turns external data into a domain type.
 ---
+<!-- generated from tenets/ET-0003-validating-at-boundaries.md by `uv run poe build` — do not edit by hand. -->
 
 # ET-0003 — Validate at trust boundaries, trust the core
 

@@ -2,6 +2,7 @@
 name: et-0006-naming-after-the-domain
 description: Use when choosing a name for a variable, parameter, field, or type that ends in `Array`/`List`/`Dict`/`Map`/`Manager`/`Helper`; naming a function after how it works (`run`, `process`, `handle`) instead of what it does to the domain; reviewing a diff that introduces identifiers like `userData`, `customerObj`, `orderInfo`; renaming an identifier whose current name leaks the type or storage.
 ---
+<!-- generated from tenets/ET-0006-naming-after-the-domain.md by `uv run poe build` — do not edit by hand. -->
 
 # ET-0006 — Names describe the domain, not the implementation
 
