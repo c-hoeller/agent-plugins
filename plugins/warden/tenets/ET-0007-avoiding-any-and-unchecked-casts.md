@@ -116,24 +116,23 @@ config.unknownField = "hello";
 
 ## Rationalizations
 
-- **"TypeScript is too strict here, the value really is a `Foo`."**
-  If you know the shape, encode the proof: a type guard, a schema
-  parse, or a constructor on the domain type. A bare `as Foo`
-  records your belief, not the proof. The day the upstream shape
-  changes, your belief silently becomes wrong.
-- **"It's just JSON from our own API, we control it."**
-  You control today's deploy. The next deploy renames a field, the
-  rolling update has both versions live for ten minutes, and a
-  validation parser turns a 1% error rate into a clear log line —
-  versus an `as` that turns it into a stack-traceless `undefined`
-  bug.
-- **"`unknown` is annoying, I have to write a guard."**
-  That is the feature, not the bug. The annoyance is exactly the
-  amount of work proportional to the risk you are taking; the
-  guard is also the place where tests live and the place where
-  future type changes are noticed.
+- **"TypeScript is too strict here, the value really is a `Foo`."** If
+  you know the shape, encode the proof: a type guard, a schema parse,
+  or a constructor on the domain type. A bare `as Foo` records your
+  belief, not the proof. The day the upstream shape changes, your
+  belief silently becomes wrong.
+- **"It's just JSON from our own API, we control it."** You control
+  today's deploy. The next deploy renames a field, the rolling update
+  has both versions live for ten minutes, and a validation parser
+  turns a 1% error rate into a clear log line — versus an `as` that
+  turns it into a stack-traceless `undefined` bug.
+- **"`unknown` is annoying, I have to write a guard."** That is the
+  feature, not the bug. The annoyance is exactly the amount of work
+  proportional to the risk you are taking; the guard is also the
+  place where tests live and the place where future type changes are
+  noticed.
 - **"`@ts-ignore` is just for now — I'll remove it after the deploy."**
   Modifier widenings and type-suppressions almost never revert; the
   next contributor sees the comment and assumes it is load-bearing.
-  Use `@ts-expect-error` instead — if the underlying error goes
-  away, the directive itself fails and forces removal.
+  Use `@ts-expect-error` instead — if the underlying error goes away,
+  the directive itself fails and forces removal.

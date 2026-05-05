@@ -143,18 +143,18 @@ test("welcome email is sent", () => {
 
 ## Rationalizations
 
-- **"It's easier to test the helper directly."**
-  See ET-0001. If the helper is hard to test through the public
-  surface, the public surface is missing something — extract a
-  collaborator the test can drive, or expose the observable result.
-- **"Mocks are faster than real fakes."**
-  Speed is rarely the bottleneck a project actually has; broken
-  refactors are. A real fake costs once to build and saves every
-  refactor afterwards; a wall of mocks costs every refactor forever.
-- **"I need to prove the cache was hit / the retry happened."**
-  Then the cache hit and the retry are observable behaviors — expose
-  them as metrics, counters, or decorator state, and assert on those.
-  The test is right; the design is missing the observable.
+- **"It's easier to test the helper directly."** See ET-0001. If the
+  helper is hard to test through the public surface, the public
+  surface is missing something — extract a collaborator the test can
+  drive, or expose the observable result.
+- **"Mocks are faster than real fakes."** Speed is rarely the
+  bottleneck a project actually has; broken refactors are. A real
+  fake costs once to build and saves every refactor afterwards; a
+  wall of mocks costs every refactor forever.
+- **"I need to prove the cache was hit / the retry happened."** Then
+  the cache hit and the retry are observable behaviors — expose them
+  as metrics, counters, or decorator state, and assert on those. The
+  test is right; the design is missing the observable.
 - **"The collaborator is an interface, so mocking it is fine."**
   Interfaces describe shape, not contract. Mocking an interface lets
   you assert against a fiction; a real fake forces you to encode the

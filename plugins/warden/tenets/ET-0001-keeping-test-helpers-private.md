@@ -4,6 +4,7 @@ title: Never lower access modifiers for testing
 type: anti-pattern
 tier: 1
 applies-to: any
+since: 0.1.0
 triggers:
   - keeping a member private when a test wants to call it directly
   - testing a class whose helper is private/protected/internal and the test cannot reach it
@@ -21,7 +22,6 @@ paths:
   - "**/*.dart"
 tags: [testing, encapsulation, oop]
 related: []
-since: 0.1.0
 ---
 
 ## Rule

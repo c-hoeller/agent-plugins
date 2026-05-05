@@ -128,22 +128,22 @@ function settleOrders(orders: Iterable<Order>): Receipt[] {
 
 ## Rationalizations
 
-- **"It's clearer what type it is at a glance."**
-  Your IDE shows the type. The name's job is to carry meaning the
-  type cannot — what this thing *is for*. `userArray` doesn't tell
-  you whether it's "all users", "logged-in users", or "users to
-  notify"; `recipients` does.
-- **"I'll forget it's a list / dict otherwise."**
-  Then the scope is too long. Either narrow the scope so the type is
-  visible at a glance, or wrap the collection in a domain type
-  (`Recipients`, `Inventory`, `Cart`) that also carries the
-  invariants you actually care about.
+- **"It's clearer what type it is at a glance."** Your IDE shows the
+  type. The name's job is to carry meaning the type cannot — what
+  this thing *is for*. `userArray` doesn't tell you whether it's
+  "all users", "logged-in users", or "users to notify"; `recipients`
+  does.
+- **"I'll forget it's a list / dict otherwise."** Then the scope is
+  too long. Either narrow the scope so the type is visible at a
+  glance, or wrap the collection in a domain type (`Recipients`,
+  `Inventory`, `Cart`) that also carries the invariants you actually
+  care about.
 - **"`Manager` / `Helper` is fine, the team uses it everywhere."**
   Team-wide use is the symptom, not the justification. Each
   `*Manager` is hiding a distinct domain concept that was never
   named; finding those names is a one-time cost that pays off every
   time someone tries to locate behavior.
-- **"Renaming is risky / churn-y."**
-  Modern refactor tools rename safely. The risk is leaving the lying
-  name in place: every contributor learns to ignore the type-leaking
-  suffix, and the next bad name slips in unchallenged.
+- **"Renaming is risky / churn-y."** Modern refactor tools rename
+  safely. The risk is leaving the lying name in place: every
+  contributor learns to ignore the type-leaking suffix, and the next
+  bad name slips in unchallenged.

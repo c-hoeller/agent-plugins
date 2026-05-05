@@ -8,6 +8,11 @@ id: ET-NNNN
 title: <one-sentence imperative title>
 
 # best-practice | anti-pattern
+# Pick `anti-pattern` when the Rule is a "Never X" (the prose names what is
+# forbidden). Pick `best-practice` when the Rule is an "Always do Y" (the
+# prose names the positive shape). If both framings work equally well,
+# prefer `anti-pattern` — concrete prohibitions trigger more reliably than
+# abstract recommendations.
 type: anti-pattern
 
 # 1 = universal, always-relevant; listed in the always-on Charter index.
@@ -24,9 +29,10 @@ tier: 1
 # in `paths:` instead (e.g. paths: ["**/*.{ts,tsx,js,jsx}"]).
 applies-to: any
 
-# Plugin SemVer in which this tenet was introduced. Bump only when the
-# tenet is added or substantially rewritten — minor wording edits do not
-# bump `since`.
+# Plugin SemVer (MAJOR.MINOR.PATCH) at the time this tenet was first
+# introduced. Frozen — never updated later, even on substantial rewrites.
+# Validation rejects non-SemVer values (no pre-release suffixes, no `v`
+# prefix, no two-segment forms).
 since: 0.1.0
 
 # 3–5 short, action-shaped phrases describing situations where this tenet
@@ -133,7 +139,6 @@ excuse for this rule, drop the section entirely — empty rows are noise.
 Each row pairs the verbatim excuse with the underlying reality and the
 correct action.>
 
-- **"_the excuse, in the agent's or user's voice — verbatim_"** —
-  _the reality underneath the excuse, in one sentence_.
-  _The correct action._
-- **"_another excuse — verbatim_"** — _reality_. _correct action_.
+- **"The excuse, in the agent's or user's voice — verbatim."** The
+  reality underneath the excuse, in one sentence. The correct action.
+- **"Another excuse — verbatim."** Reality. Correct action.

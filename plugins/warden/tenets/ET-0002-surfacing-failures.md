@@ -132,21 +132,21 @@ async function loadConfig(): Promise<Config> {
 
 ## Rationalizations
 
-- **"I'll just log it for now and figure out recovery later."**
-  "Later" turns into a corrupted database six months later. If you
-  cannot decide on recovery now, propagate; the next layer either
-  handles it or fails loudly. Logging plus silent return is the worst
-  of both worlds — the failure is observable but not visible.
-- **"The caller doesn't expect an exception here."**
-  Then the caller is wrong, or the signature is. Document the exception,
-  return a `Result`/`Either`/`tuple[None, Error]`, or split the API into
-  a "may-fail" and a "won't-fail" form. Don't paper over the type
+- **"I'll just log it for now and figure out recovery later."** "Later"
+  turns into a corrupted database six months later. If you cannot
+  decide on recovery now, propagate; the next layer either handles it
+  or fails loudly. Logging plus silent return is the worst of both
+  worlds — the failure is observable but not visible.
+- **"The caller doesn't expect an exception here."** Then the caller
+  is wrong, or the signature is. Document the exception, return a
+  `Result`/`Either`/`tuple[None, Error]`, or split the API into a
+  "may-fail" and a "won't-fail" form. Don't paper over the type
   mismatch by faking success.
 - **"I'm catching `Exception` because I don't know what it can throw."**
   That is the bug, not the fix. Read the code path, list the realistic
   failures, and catch only those. A blanket catch hides the new failure
   mode the next refactor introduces.
-- **"It's just a UI / non-critical path."**
-  Silent UI failures train users to retry blindly and hide outages from
-  ops. Show the failure in the UI (toast, error state) and report it to
-  the error tracker — that is mapping, not swallowing.
+- **"It's just a UI / non-critical path."** Silent UI failures train
+  users to retry blindly and hide outages from ops. Show the failure
+  in the UI (toast, error state) and report it to the error tracker —
+  that is mapping, not swallowing.

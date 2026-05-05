@@ -138,21 +138,20 @@ function priceOrder(order: Order): number {
 
 ## Rationalizations
 
-- **"What if someone passes null anyway?"**
-  Then your type system is lying — fix the signature (non-nullable,
-  `Optional`/`Maybe`), not the call site. The guard buries the contract
-  violation in a generic exception two layers deep instead of catching
-  it at the boundary where the response can be meaningful.
-- **"Defense in depth — extra checks can't hurt."**
-  They can: each check duplicates the validation rule, so the next
-  refactor must update N places, and a missed update creates two
-  branches that disagree about what "valid" means. Defense in depth
-  applies to *security* invariants, not to type-system facts.
-- **"It's just one `if` — barely any cost."**
-  Compounded across a codebase, defensive guards become the dominant
-  reading cost. Worse, they normalise the habit: the next contributor
-  copies the pattern, and the boundary check that should exist never
-  gets written.
+- **"What if someone passes null anyway?"** Then your type system is
+  lying — fix the signature (non-nullable, `Optional`/`Maybe`), not
+  the call site. The guard buries the contract violation in a generic
+  exception two layers deep instead of catching it at the boundary
+  where the response can be meaningful.
+- **"Defense in depth — extra checks can't hurt."** They can: each
+  check duplicates the validation rule, so the next refactor must
+  update N places, and a missed update creates two branches that
+  disagree about what "valid" means. Defense in depth applies to
+  *security* invariants, not to type-system facts.
+- **"It's just one `if` — barely any cost."** Compounded across a
+  codebase, defensive guards become the dominant reading cost. Worse,
+  they normalise the habit: the next contributor copies the pattern,
+  and the boundary check that should exist never gets written.
 - **"The compiler doesn't know X is non-empty / sorted / positive."**
   Then encode it: `NonEmptyList<T>`, a `PositiveInt` value object, a
   factory method on the type. Push the invariant into the type

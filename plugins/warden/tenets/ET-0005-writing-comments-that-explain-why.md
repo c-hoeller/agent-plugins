@@ -138,22 +138,21 @@ function priceOrder(order: Order): number {
 
 ## Rationalizations
 
-- **"Future me will thank me for the explanation."**
-  Future-you will read the code, not the comment. The comment that
-  helps future-you is the one that says *why* the obvious approach
-  was rejected, not the one that paraphrases the loop. If the code
-  needs paraphrasing, rename it.
-- **"More documentation is always better."**
-  Wrong direction. More *correct* documentation is better; more
-  documentation total raises the chance of a stale comment, which is
-  worse than no comment at all because it actively misleads.
-- **"The reviewer asked for a comment."**
-  Then the reviewer found something non-obvious — capture *that* (the
-  invariant, the constraint, the past incident), not a paraphrase of
-  the line. If the reviewer wanted a paraphrase, the line itself
-  needs renaming.
-- **"It's a one-line comment, what's the harm?"**
-  The harm is the next change to the line: comment doesn't update,
-  code does, and now the file has two truths. Multiplied by every
-  one-line narration in a codebase, you get the long-term reading tax
-  this rule exists to prevent.
+- **"Future me will thank me for the explanation."** Future-you will
+  read the code, not the comment. The comment that helps future-you
+  is the one that says *why* the obvious approach was rejected, not
+  the one that paraphrases the loop. If the code needs paraphrasing,
+  rename it.
+- **"More documentation is always better."** Wrong direction. More
+  *correct* documentation is better; more documentation total raises
+  the chance of a stale comment, which is worse than no comment at
+  all because it actively misleads.
+- **"The reviewer asked for a comment."** Then the reviewer found
+  something non-obvious — capture *that* (the invariant, the
+  constraint, the past incident), not a paraphrase of the line. If
+  the reviewer wanted a paraphrase, the line itself needs renaming.
+- **"It's a one-line comment, what's the harm?"** The harm is the
+  next change to the line: comment doesn't update, code does, and
+  now the file has two truths. Multiplied by every one-line narration
+  in a codebase, you get the long-term reading tax this rule exists
+  to prevent.
