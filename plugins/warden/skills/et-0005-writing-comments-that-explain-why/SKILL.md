@@ -1,6 +1,7 @@
 ---
 name: et-0005-writing-comments-that-explain-why
 description: Use when writing a comment that paraphrases the line of code immediately below it; adding a docstring to a function whose name and signature already say everything; reviewing a diff that adds explanatory comments to make obvious code "easier to read"; deciding whether a non-obvious decision (workaround, constraint, invariant) needs a comment.
+user-invocable: false
 ---
 <!-- generated from tenets/ET-0005-writing-comments-that-explain-why.md by `uv run poe build` — do not edit by hand. -->
 

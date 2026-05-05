@@ -1,6 +1,7 @@
 ---
 name: lookup-tenet
 description: Use when an Engineering Tenet might apply to the work but no `et-NNNN-*` skill auto-loaded — e.g. when reviewing a diff in an unfamiliar area, when the user asks "is this allowed?", when verifying an Exception clause before invoking it, or when looking up a tenet by ID.
+user-invocable: false
 ---
 
 # Looking Up an Engineering Tenet

@@ -402,7 +402,16 @@ def render_skill_for_tenet(tenet: Tenet) -> tuple[str, str]:
     skill_name = _skill_name_for(tenet)
     description = _build_skill_description(tenet)
 
-    fm: list[str] = ["---", f"name: {skill_name}", f"description: {description}"]
+    # `user-invocable: false` keeps generated tenet skills out of the `/` menu.
+    # They are background knowledge that auto-loads via triggers / paths; no
+    # user types `/warden:et-0001-…` directly. Hides them from autocomplete
+    # without affecting Claude's ability to invoke them.
+    fm: list[str] = [
+        "---",
+        f"name: {skill_name}",
+        f"description: {description}",
+        "user-invocable: false",
+    ]
     if tenet.paths:
         # Emitted as a YAML flow sequence so a one-line addition to the
         # frontmatter doesn't visually overwhelm the file. Patterns are

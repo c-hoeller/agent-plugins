@@ -9,7 +9,6 @@
 # is justified by the empirical hit rate.
 #
 # Usage: measure.sh <measurement-name>
-#   e.g. measure.sh using-warden
 #
 # Costs real Claude API calls (one per prompt). Run manually; not part
 # of `poe ci`.

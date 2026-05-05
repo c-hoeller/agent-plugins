@@ -40,12 +40,13 @@ Two distinct concepts live under this directory:
   whether a description tweak / force-load mechanism / reorganisation
   is justified, before pinning anything as a pass/fail test.
 
-The first measurement in the tree is `using-warden`, which collects
-empirical data on whether the bootstrap skill auto-loads in vague,
-competing-with-et, and non-code prompts. Run with:
+Add a measurement when you want empirical data on whether a skill
+auto-loads in a particular class of prompts (e.g. competing with other
+skills, vague code actions, non-code conversation). Drop prompts under
+`measurements/<measurement-name>/<class>/*.txt` and run:
 
 ```bash
-uv run poe behavior-measure using-warden
+uv run poe behavior-measure <measurement-name>
 ```
 
 ## Layout

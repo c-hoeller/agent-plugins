@@ -1,1 +1,0 @@
-I need to add a recurring scheduled job that runs nightly and emails our finance team a CSV report of yesterday's transactions. Walk me through how you'd build this.

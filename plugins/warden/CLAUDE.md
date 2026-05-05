@@ -36,10 +36,9 @@ the build would emit. The CI gate `poe ci` enforces this via
 2. **Always commit generated artifacts alongside the source change.**
    `poe ci` runs `build-check`, which fails if a tenet edit was made
    without re-building.
-3. **The `lookup-tenet` and `using-warden` skills under `skills/` are
-   hand-authored** — `_clean_generated_skills` only touches `et-*`
-   prefixed dirs, so these are safe, but check before deleting
-   anything in `skills/`.
+3. **The `lookup-tenet` skill under `skills/` is hand-authored** —
+   `_clean_generated_skills` only touches `et-*` prefixed dirs, so it
+   is safe, but check before deleting anything in `skills/`.
 4. **No new runtime dependencies in the hook.** The wrapper
    `run-hook.cmd` is intentionally limited to POSIX `sh + cat` (Unix)
    and `cmd.exe` locating `bash.exe` from Git for Windows / MSYS2 /
@@ -68,7 +67,6 @@ the build would emit. The CI gate `poe ci` enforces this via
 | Generated Charter (committed)        | [`build/charter.md`](build/charter.md), [`build/charter.json`](build/charter.json) |
 | Generated index (committed)          | [`build/index.json`](build/index.json)                |
 | Charter preamble source              | [`templates/charter-preamble.md`](templates/charter-preamble.md) |
-| Hand-authored bootstrap skill        | [`skills/using-warden/SKILL.md`](skills/using-warden/SKILL.md) |
 | Hand-authored lookup skill           | [`skills/lookup-tenet/SKILL.md`](skills/lookup-tenet/SKILL.md) |
 | Generated per-tenet skills           | [`skills/et-NNNN-<slug>/SKILL.md`](skills/)           |
 

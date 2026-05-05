@@ -70,7 +70,6 @@ plugins/warden/
 ├── .claude-plugin/plugin.json    # Claude Code plugin manifest
 ├── hooks/                        # SessionStart hook + registration
 ├── skills/
-│   ├── using-warden/             # hand-authored bootstrap
 │   ├── lookup-tenet/             # hand-authored catalog browser
 │   └── et-NNNN-<slug>/           # generated: one auto-loadable skill per tenet
 ├── tenets/                       # source of truth — one file per tenet
@@ -84,8 +83,8 @@ plugins/warden/
 The `skills/et-*/` directories and `build/` are **fully generated**
 by `uv run poe build` from `tenets/`. They are committed so the
 plugin is installable on `git clone` without a build step.
-Hand-authored skills (`using-warden`, `lookup-tenet`) live alongside
-and are never touched by the build.
+The hand-authored `lookup-tenet` skill lives alongside and is never
+touched by the build.
 
 ## Authoring a tenet
 
