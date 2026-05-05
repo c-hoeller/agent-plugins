@@ -3,7 +3,7 @@
 REM ============================================================================
 REM Warden cross-platform hook wrapper — polyglot Windows .cmd / Unix shell.
 REM
-REM Architecture (mirrors obra/superpowers' run-hook.cmd):
+REM Architecture:
 REM   - This file is BOTH a Windows .cmd batch script AND a POSIX shell script.
 REM   - The actual hook logic lives in extensionless sibling scripts (e.g.
 REM     "session-start") so this wrapper is reusable for future hooks and so

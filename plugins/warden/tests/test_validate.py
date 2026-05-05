@@ -40,35 +40,27 @@ def test_invalid_tier_is_flagged(make_tenet, tenets_dir: Path):
     assert any("tier" in e.message for e in errors)
 
 
-def test_invalid_semver_in_since_is_flagged(make_tenet, tenets_dir: Path):
-    make_tenet(since="oneish")
+def test_since_must_be_non_empty(make_tenet, tenets_dir: Path):
+    # `since` is documentation-only; we only require non-empty (no SemVer check).
+    make_tenet(since="")
     errors = _validate(tenets_dir)
-    assert any("SemVer" in e.message for e in errors)
+    assert any("since" in e.message for e in errors)
 
 
-def test_applies_to_mapping_form_valid(make_tenet, tenets_dir: Path):
+def test_applies_to_mapping_form_is_accepted(make_tenet, tenets_dir: Path):
     make_tenet(applies_to={"language": "TypeScript"})
     assert _validate(tenets_dir) == []
 
 
-def test_applies_to_string_other_than_any_is_flagged(make_tenet, tenets_dir: Path):
-    # Only "any" is a valid string form; "language: TS" colon-strings used to
-    # be accepted but were dropped — mapping form is the canonical alternative.
+def test_applies_to_arbitrary_string_is_accepted(make_tenet, tenets_dir: Path):
+    # applies-to is documentation; the actual auto-load gate is `paths:`.
+    # Authors are free to pick any concise label.
     make_tenet(applies_to="language: typescript")
-    errors = _validate(tenets_dir)
-    assert any("applies-to" in e.message for e in errors)
+    assert _validate(tenets_dir) == []
 
 
-def test_applies_to_invalid_key(make_tenet, tenets_dir: Path):
-    make_tenet(applies_to={"weird": "ts"})
-    errors = _validate(tenets_dir)
-    assert any("applies-to" in e.message for e in errors)
-
-
-def test_applies_to_list_form_is_flagged(make_tenet, tenets_dir: Path):
-    # List form is intentionally no longer supported — multi-language tenets
-    # should scope via `paths:` globs instead.
-    make_tenet(applies_to=[{"language": "TypeScript"}, {"language": "JavaScript"}])
+def test_applies_to_empty_string_is_flagged(make_tenet, tenets_dir: Path):
+    make_tenet(applies_to="")
     errors = _validate(tenets_dir)
     assert any("applies-to" in e.message for e in errors)
 

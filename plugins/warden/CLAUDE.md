@@ -60,13 +60,14 @@ the build would emit. The CI gate `poe ci` enforces this via
 | New-tenet starting point             | [`templates/ET-NNNN-template.md`](templates/ET-NNNN-template.md) |
 | Parsing / validation / rendering     | [`scripts/lib/warden_lib.py`](scripts/lib/warden_lib.py) |
 | Build entry point                    | [`scripts/build.py`](scripts/build.py)                |
-| CI build-drift check                 | [`scripts/build_check.py`](scripts/build_check.py)    |
+| CI build-drift check                 | [`scripts/build.py --check`](scripts/build.py)        |
 | Standalone validation                | [`scripts/validate.py`](scripts/validate.py)          |
 | SessionStart hook wrapper (polyglot) | [`hooks/run-hook.cmd`](hooks/run-hook.cmd)            |
 | SessionStart hook payload (bash)     | [`hooks/session-start`](hooks/session-start)          |
 | Hook registration                    | [`hooks/hooks.json`](hooks/hooks.json)                |
 | Generated Charter (committed)        | [`build/charter.md`](build/charter.md), [`build/charter.json`](build/charter.json) |
-| Generated index (committed)          | [`build/index.md`](build/index.md)                    |
+| Generated index (committed)          | [`build/index.json`](build/index.json)                |
+| Charter preamble source              | [`templates/charter-preamble.md`](templates/charter-preamble.md) |
 | Hand-authored bootstrap skill        | [`skills/using-warden/SKILL.md`](skills/using-warden/SKILL.md) |
 | Hand-authored lookup skill           | [`skills/lookup-tenet/SKILL.md`](skills/lookup-tenet/SKILL.md) |
 | Generated per-tenet skills           | [`skills/et-NNNN-<slug>/SKILL.md`](skills/)           |
@@ -101,7 +102,8 @@ the build would emit. The CI gate `poe ci` enforces this via
 - **Triggers use positive framing**, even when the Rule is negative.
   Situations read more naturally in positive form ("when about to X")
   than as negated ones ("never X"); the Rule body keeps the hard
-  "Never". Convention shared with `obra/superpowers`.
+  "Never". Skill descriptions read as "when to use" prose; the
+  imperative belongs in the Rule.
 - **Front-load the strongest trigger** — skill `description` is capped
   at 1,536 chars in the global skill listing (per [Claude Code Skills
   docs](https://code.claude.com/docs/en/skills)); the first trigger is

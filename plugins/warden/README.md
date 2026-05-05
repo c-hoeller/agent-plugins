@@ -75,7 +75,7 @@ plugins/warden/
 │   └── et-NNNN-<slug>/           # generated: one auto-loadable skill per tenet
 ├── tenets/                       # source of truth — one file per tenet
 ├── templates/ET-NNNN-template.md # starting point for a new tenet
-├── build/                        # generated, committed (charter + index.md + index.json)
+├── build/                        # generated, committed (charter + index.json)
 ├── scripts/                      # build/validation tooling — see CONTRIBUTING.md
 ├── tests/                        # pytest suite
 └── pyproject.toml                # uv-managed deps + tool config
@@ -123,9 +123,8 @@ matches against to auto-invoke the skill. Three rules:
    describe the *situation* that activates the tenet, and situations
    read more naturally in positive form ("when about to X") than as
    negated ones ("never X"). The Rule body itself can — and should — be
-   a hard "Never"; only the triggers shift. This convention is shared
-   with `obra/superpowers`, where it correlates with more reliable
-   auto-invocation in observed sessions.
+   a hard "Never"; only the triggers shift. Skill descriptions read as
+   "when to use" prose; the imperative belongs in the Rule.
 3. **Front-load the strongest trigger.** Skill `description` (combined
    with `when_to_use` if present) is capped at 1,536 characters in the
    global skill listing (see [Claude Code Skills docs][skills]); when

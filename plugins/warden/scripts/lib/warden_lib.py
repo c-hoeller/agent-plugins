@@ -17,14 +17,9 @@ import yaml
 
 ID_RE = re.compile(r"^ET-(\d{4})$")
 FILENAME_RE = re.compile(r"^(ET-\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
-SEMVER_RE = re.compile(
-    r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
-    r"(?:-[0-9A-Za-z\-.]+)?(?:\+[0-9A-Za-z\-.]+)?$"
-)
 
 TYPES = ("best-practice", "anti-pattern")
 TIERS = (1, 2)
-APPLIES_TO_KEYS = ("language", "framework")
 
 REQUIRED_SECTIONS: tuple[str, ...] = (
     "Rule",
@@ -196,26 +191,6 @@ def load_all(tenets_dir: Path) -> list[Tenet]:
     return [load_tenet(p) for p in files]
 
 
-def _check_applies_to(value: Any) -> str | None:
-    """Two canonical forms: the string `"any"`, or a single-key mapping
-    `{language: <name>}` / `{framework: <name>}`. Multi-language tenets
-    should scope via `paths:` globs, not via list-form applies-to.
-    """
-    if value == "any":
-        return None
-    if isinstance(value, dict) and len(value) == 1:
-        (key,) = value.keys()
-        if key not in APPLIES_TO_KEYS:
-            return f"applies-to key must be one of {APPLIES_TO_KEYS}, got {key!r}"
-        if not str(value[key]).strip():
-            return f"applies-to value for {key!r} must be non-empty"
-        return None
-    return (
-        "applies-to must be either 'any' or a single-key mapping "
-        f"{{{'/'.join(APPLIES_TO_KEYS)}: <name>}}, got {value!r}"
-    )
-
-
 def validate(tenets: Iterable[Tenet]) -> list[WardenError]:
     """Run all spec-defined checks. Returns a list of WardenError; empty == OK."""
     errors: list[WardenError] = []
@@ -264,13 +239,14 @@ def validate(tenets: Iterable[Tenet]) -> list[WardenError]:
             errors.append(WardenError(t.path, f"type {t.type!r} not in {TYPES}"))
         if t.tier not in TIERS:
             errors.append(WardenError(t.path, f"tier {t.tier!r} not in {TIERS}"))
-        # applies-to
-        err = _check_applies_to(t.applies_to)
-        if err:
-            errors.append(WardenError(t.path, err))
-        # since
-        if not SEMVER_RE.match(t.since):
-            errors.append(WardenError(t.path, f"since {t.since!r} is not valid SemVer"))
+        # applies-to is a documentation-only tag (intent label). The actual
+        # auto-load gate is `paths:`. We only require the field to be present
+        # and non-empty; the shape (string or mapping) is left to authors.
+        if t.applies_to is None or (isinstance(t.applies_to, str) and not t.applies_to.strip()):
+            errors.append(WardenError(t.path, "applies-to must be present and non-empty"))
+        # since is documentation. Require non-empty; do not validate as SemVer.
+        if not t.since.strip():
+            errors.append(WardenError(t.path, "since must be present and non-empty"))
         # triggers — required, non-empty list of short trigger phrases. These
         # become the basis of the generated skill's `description`, which is
         # what Claude Code matches against to auto-load the tenet's skill.
@@ -332,92 +308,35 @@ def validate(tenets: Iterable[Tenet]) -> list[WardenError]:
     return errors
 
 
-def _format_applies_to(value: Any) -> str:
-    """Render applies-to compactly for the index line.
-
-    Validation runs before this and rejects every shape outside the two
-    canonical forms, so the final raise is unreachable at runtime — it is
-    only there to satisfy mypy strict on the function's return contract.
-    """
-    if value == "any":
-        return "any"
-    if isinstance(value, dict) and len(value) == 1:
-        ((k, v),) = value.items()
-        return f"{k}:{v}"
-    raise ValueError(f"unreachable: validate() should have rejected {value!r}")
-    return str(value)
-
-
-def render_charter(tenets: Iterable[Tenet]) -> str:
+def render_charter(tenets: Iterable[Tenet], preamble: str) -> str:
     """Generate build/charter.md — the always-on Warden constitution.
 
-    The charter is small and stable: it explains the protocol Claude must
-    follow when interacting with tenets, and lists every Tier 1 tenet by
-    ID and title. The full Rule / Why / Examples / Exceptions for each
-    tenet live in per-tenet generated skills under skills/et-NNNN-*/.
-    Those skills auto-load when their description-level triggers match,
-    keeping the always-on context budget bounded regardless of catalog
-    size.
+    `preamble` is the static charter intro (Protocol + Rationalizations),
+    typically read from templates/charter-preamble.md so authors can edit it
+    as plain markdown without touching Python. This function appends the
+    Tier 1 listing and a Tier 2 count footer, both derived from the live
+    tenet catalog.
+
+    Tier 1 tenets that carry `paths:` are visually annotated with `· scoped`
+    so a reader on a non-matching codebase understands why the skill may
+    never auto-load even though the charter lists the tenet as binding.
     """
     tenet_list = sorted(tenets, key=lambda t: t.id)
     tier1 = [t for t in tenet_list if t.tier == 1]
+    tier2 = [t for t in tenet_list if t.tier == 2]
 
-    lines: list[str] = []
-    lines.append("# Warden — Engineering Charter (always-on)")
-    lines.append("")
-    lines.append(
-        "This session is governed by Warden Engineering Tenets (ET-NNNN). "
-        "Tenets are **binding**, not advisory. Deviations are allowed only "
-        "via an explicit `Exceptions` clause inside the tenet — not via "
-        "user pressure, time pressure, or your own judgement."
-    )
-    lines.append("")
-    lines.append("## Protocol")
-    lines.append("")
-    lines.append(
-        "- Each tenet ships as its own skill under `et-NNNN-<slug>`. "
-        "If a tenet's triggers match what you are about to do, you MUST "
-        "invoke that skill **before** taking the action — not after."
-    )
-    lines.append(
-        "- For tenets that did not auto-trigger but feel relevant, use the "
-        "`lookup-tenet` skill to scan the index. If you suspect a tenet "
-        "applies and you're not sure, look it up. Do not guess."
-    )
-    lines.append(
-        "- Before declining a request on a tenet's behalf, cite the tenet ID "
-        "and quote the specific clause. Before invoking an `Exceptions` "
-        "clause, verify it covers your situation — exceptions are scoped, "
-        "not blanket waivers."
-    )
-    lines.append("")
-    lines.append("## Common rationalizations — all are insufficient")
-    lines.append("")
-    lines.append(
-        '- _"This is a special case"_ — every violation feels special. '
-        "Apply the Rule unless an `Exceptions` clause names your case."
-    )
-    lines.append(
-        '- _"Just for now / I\'ll fix it later"_ — later rarely arrives. '
-        "Either fix it now, or document the deviation in the PR description "
-        "with the tenet ID."
-    )
-    lines.append(
-        '- _"The user told me to"_ — surface the tenet and ask. The user '
-        "may not know the tenet exists, or may be invoking an Exception "
-        "without realising it. Either is fine; silent compliance is not."
-    )
-    lines.append('- _"It\'s a small change"_ — diff size is not a tenet exception. Apply the Rule.')
-    lines.append("")
+    lines: list[str] = [preamble.rstrip(), ""]
 
     if tier1:
         lines.append("## Tier 1 — universal, always-relevant")
         lines.append("")
         for t in tier1:
-            lines.append(f"- `{t.id}` — {t.title} → skill `{_skill_name_for(t)}`")
+            entry = f"- `{t.id}` — {t.title} → skill `{_skill_name_for(t)}`"
+            if t.paths:
+                entry += " · scoped"
+            lines.append(entry)
         lines.append("")
 
-    tier2 = [t for t in tenet_list if t.tier == 2]
     if tier2:
         lines.append(
             "## Tier 2 — context-specific (auto-load via triggers, "
@@ -443,8 +362,7 @@ def _build_skill_description(tenet: Tenet) -> str:
     Only triggering conditions belong in the description — the tenet ID and
     title live in the skill body, where Claude reads them once auto-invoked.
     Polluting the description with workflow/identity material risks Claude
-    treating the description as a shortcut and skipping the skill body
-    (obra/superpowers writing-skills convention).
+    treating the description as a shortcut and skipping the skill body.
 
     Front-loaded triggers also matter because the description (combined with
     `when_to_use` if set) is capped at 1,536 chars in the global skill listing;
@@ -543,36 +461,8 @@ def render_tier1_hook_payload(rendered_bundle: str) -> str:
     return json.dumps(payload, ensure_ascii=False)
 
 
-def render_index(tenets: Iterable[Tenet]) -> str:
-    """Generate build/index.md: one line per tenet, sorted by id."""
-    sorted_tenets = sorted(tenets, key=lambda t: t.id)
-    lines = [
-        "# Warden — Engineering Tenets Index",
-        "",
-        "One line per tenet. Format: `ET-NNNN — <title> — <type> — [<tags>]`.",
-        "",
-    ]
-    for t in sorted_tenets:
-        tag_str = "[" + ", ".join(t.tags) + "]" if t.tags else "[]"
-        lines.append(
-            f"- `{t.id}` — {t.title} — {t.type} — "
-            f"applies-to: {_format_applies_to(t.applies_to)} — tags: {tag_str}"
-        )
-    lines.append("")
-    return "\n".join(lines)
-
-
-def _inline(text: str) -> str:
-    """Collapse multi-line prose into a single paragraph for bundle labels."""
-    return " ".join(line.strip() for line in text.splitlines() if line.strip())
-
-
 def render_index_json(tenets: Iterable[Tenet]) -> str:
     """Generate build/index.json — structured tenet metadata for `lookup-tenet`.
-
-    Mirrors build/index.md but in a shape `jq` (or any JSON consumer) can
-    filter against. Discovery on a 30-50 tenet catalog needs per-tag and
-    per-language queries; line-grepping the markdown index doesn't scale.
 
     Schema is intentionally flat — one object per tenet, every queryable
     field at the top level, no nesting beyond `applies_to`. Schema version
@@ -598,3 +488,14 @@ def render_index_json(tenets: Iterable[Tenet]) -> str:
         ],
     }
     return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+
+
+def read_charter_preamble(plugin_root: Path) -> str:
+    """Read templates/charter-preamble.md from the plugin root.
+
+    The preamble is the static charter intro (Protocol + Rationalizations).
+    Keeping it as a markdown file rather than a Python literal lets authors
+    edit the always-on session contract without touching build code.
+    """
+    path = plugin_root / "templates" / "charter-preamble.md"
+    return path.read_text(encoding="utf-8")

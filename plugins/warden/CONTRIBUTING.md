@@ -40,7 +40,7 @@ Run any task with `uv run poe <task>`:
 |-------------------------------|-------------------------------------------------------------------------|
 | `uv run poe validate`         | Validate every tenet against the spec                                   |
 | `uv run poe build`            | Validate + regenerate `build/` artifacts and per-tenet skills           |
-| `uv run poe build-check`      | Verify committed `build/` and `skills/et-*/` match `tenets/` (no writes)|
+| `uv run poe build-check`      | Verify committed `build/` and `skills/et-*/` match `tenets/` (`build.py --check`, no writes)|
 | `uv run poe test`             | Run the pytest suite                                                    |
 | `uv run poe lint`             | Ruff lint check (no auto-fix)                                           |
 | `uv run poe fix`              | Ruff lint with auto-fix                                                 |

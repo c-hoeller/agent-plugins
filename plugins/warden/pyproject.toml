@@ -79,12 +79,12 @@ help = "Validate every tenet against the spec"
 cmd = "python scripts/validate.py"
 
 [tool.poe.tasks.build]
-help = "Validate and regenerate build/tier1-bundle.md and build/index.md"
+help = "Validate and regenerate build/ artifacts and per-tenet skills"
 cmd = "python scripts/build.py"
 
 [tool.poe.tasks.build-check]
 help = "Verify that build/ and skills/et-*/ are up to date with tenets/ (CI gate)"
-cmd = "python scripts/build_check.py"
+cmd = "python scripts/build.py --check"
 
 [tool.poe.tasks.test]
 help = "Run the pytest suite"

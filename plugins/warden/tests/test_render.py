@@ -5,32 +5,10 @@ from pathlib import Path
 
 from lib import warden_lib
 
-
-def test_render_index_lists_each_tenet(make_tenet, tenets_dir: Path):
-    make_tenet(id="ET-0001", slug="a", title="First", tags=["testing", "oop"])
-    make_tenet(id="ET-0002", slug="b", title="Second", tier=2)
-    # ET-0002 is tier 2 — needs paths to be valid; inject directly.
-    p = tenets_dir / "ET-0002-b.md"
-    p.write_text(
-        p.read_text(encoding="utf-8").replace("tier: 2", 'tier: 2\npaths:\n  - "**/*.py"', 1),
-        encoding="utf-8",
-    )
-    tenets = warden_lib.load_all(tenets_dir)
-    out = warden_lib.render_index(tenets)
-    assert "ET-0001" in out
-    assert "ET-0002" in out
-    assert "tags: [testing, oop]" in out
-    assert "tags: []" in out  # second tenet has empty tags
-
-
-def test_render_index_is_sorted_by_id(make_tenet, tenets_dir: Path):
-    make_tenet(id="ET-0002", slug="b", title="Second")
-    make_tenet(id="ET-0001", slug="a", title="First")
-    tenets = warden_lib.load_all(tenets_dir)
-    out = warden_lib.render_index(tenets)
-    pos_first = out.index("ET-0001")
-    pos_second = out.index("ET-0002")
-    assert pos_first < pos_second
+# All charter-render tests use a small fixed preamble so the tier-1 listing is
+# the only thing under test. The real preamble (templates/charter-preamble.md)
+# is exercised end-to-end via test_real_catalog_charter_renders_from_template.
+PREAMBLE_FIXTURE = "# Warden — Engineering Charter\n\nProtocol goes here.\n"
 
 
 def test_render_index_json_emits_structured_tenets(make_tenet, tenets_dir: Path):
@@ -84,8 +62,14 @@ def test_render_index_json_supports_jq_style_tag_filter(make_tenet, tenets_dir: 
 def test_render_charter_lists_tier1_tenets_only_in_tier1_section(make_tenet, tenets_dir: Path):
     make_tenet(id="ET-0001", slug="a", tier=1, title="Tier1 tenet")
     make_tenet(id="ET-0002", slug="b", tier=2, title="Tier2 tenet")
+    # tier 2 needs paths
+    p = tenets_dir / "ET-0002-b.md"
+    p.write_text(
+        p.read_text(encoding="utf-8").replace("tier: 2", 'tier: 2\npaths:\n  - "**/*.py"', 1),
+        encoding="utf-8",
+    )
     tenets = warden_lib.load_all(tenets_dir)
-    out = warden_lib.render_charter(tenets)
+    out = warden_lib.render_charter(tenets, PREAMBLE_FIXTURE)
 
     tier1_section = out.split("## Tier 1")[1].split("## Tier 2")[0]
     assert "ET-0001" in tier1_section
@@ -96,34 +80,73 @@ def test_render_charter_lists_tier1_tenets_only_in_tier1_section(make_tenet, ten
     assert "Tier 2" in out
 
 
+def test_render_charter_uses_preamble_verbatim(make_tenet, tenets_dir: Path):
+    # The preamble (Protocol + Rationalizations) is read from disk and
+    # appended-to, not embedded in the renderer. Authors must be able to
+    # edit charter wording without touching Python.
+    make_tenet(id="ET-0001", slug="a", tier=1)
+    tenets = warden_lib.load_all(tenets_dir)
+    custom_preamble = "# Custom Charter Heading\n\nA totally custom paragraph.\n"
+    out = warden_lib.render_charter(tenets, custom_preamble)
+    assert "# Custom Charter Heading" in out
+    assert "A totally custom paragraph." in out
+    assert "ET-0001" in out
+
+
+def test_render_charter_marks_tier1_with_paths_as_scoped(make_tenet, tenets_dir: Path):
+    # A tier-1 tenet that carries `paths:` is binding (in the charter) but
+    # only auto-loads on matching files. The charter must signal this so a
+    # reader on a non-matching codebase doesn't silently miss the gating.
+    p = make_tenet(id="ET-0001", slug="a", tier=1, title="OOP tenet")
+    p.write_text(
+        p.read_text(encoding="utf-8").replace("tier: 1", 'tier: 1\npaths:\n  - "**/*.ts"', 1),
+        encoding="utf-8",
+    )
+    make_tenet(id="ET-0002", slug="b", tier=1, title="Universal tenet")
+    tenets = warden_lib.load_all(tenets_dir)
+    out = warden_lib.render_charter(tenets, PREAMBLE_FIXTURE)
+
+    scoped_line = next(line for line in out.splitlines() if "ET-0001" in line)
+    universal_line = next(line for line in out.splitlines() if "ET-0002" in line)
+    assert scoped_line.endswith("· scoped")
+    assert "scoped" not in universal_line
+
+
 def test_render_charter_references_full_skill_names(make_tenet, tenets_dir: Path):
     # Charter must point at the actual skill directory name so a user can
     # `cat skills/<name>/SKILL.md` directly without guessing.
     make_tenet(id="ET-0001", slug="my-tenet-here", tier=1)
     tenets = warden_lib.load_all(tenets_dir)
-    out = warden_lib.render_charter(tenets)
+    out = warden_lib.render_charter(tenets, PREAMBLE_FIXTURE)
     assert "skill `et-0001-my-tenet-here`" in out
-
-
-def test_render_charter_includes_protocol_block(make_tenet, tenets_dir: Path):
-    make_tenet(id="ET-0001", slug="a", tier=1)
-    tenets = warden_lib.load_all(tenets_dir)
-    out = warden_lib.render_charter(tenets)
-    assert "## Protocol" in out
-    assert "lookup-tenet" in out
-    assert "cite the tenet id" in out.lower()
 
 
 def test_render_charter_size_stays_small_for_25_tenets(make_tenet, tenets_dir: Path):
     # Architectural property: the always-on charter must fit comfortably
-    # under Claude Code's 10_000-character SessionStart additionalContext
-    # limit even with a large catalog. This test asserts the headline-only
-    # design holds at scale.
+    # under Claude Code's 10,000-character SessionStart additionalContext
+    # limit even with a large catalog. 8,000 leaves 20% headroom; the test
+    # asserts the headline-only design holds at scale.
     for i in range(1, 26):
         make_tenet(id=f"ET-{i:04d}", slug=f"slug-{i}", tier=1)
     tenets = warden_lib.load_all(tenets_dir)
-    out = warden_lib.render_charter(tenets)
-    assert len(out) < 5_000, f"charter unexpectedly large: {len(out)} chars"
+    # Use the real preamble so this is a realistic upper bound.
+    plugin_root = Path(__file__).resolve().parent.parent
+    preamble = warden_lib.read_charter_preamble(plugin_root)
+    out = warden_lib.render_charter(tenets, preamble)
+    assert len(out) < 8_000, f"charter unexpectedly large: {len(out)} chars"
+
+
+def test_real_catalog_charter_renders_from_template():
+    """End-to-end check that the committed preamble + live tenets render
+    a charter containing the protocol and at least one ET-id."""
+    plugin_root = Path(__file__).resolve().parent.parent
+    tenets = warden_lib.load_all(plugin_root / "tenets")
+    preamble = warden_lib.read_charter_preamble(plugin_root)
+    out = warden_lib.render_charter(tenets, preamble)
+    assert "## Protocol" in out
+    assert "lookup-tenet" in out
+    assert "cite the tenet id" in out.lower()
+    assert "ET-0001" in out
 
 
 def test_render_skill_for_tenet_has_minimal_frontmatter(make_tenet, tenets_dir: Path):
@@ -239,7 +262,7 @@ def test_real_catalog_unscoped_description_usage_under_budget():
 def test_hook_payload_is_valid_session_start_json(make_tenet, tenets_dir: Path):
     make_tenet(id="ET-0001", slug="a", tier=1, title="Tier1 tenet")
     tenets = warden_lib.load_all(tenets_dir)
-    rendered = warden_lib.render_charter(tenets)
+    rendered = warden_lib.render_charter(tenets, PREAMBLE_FIXTURE)
     payload = warden_lib.render_tier1_hook_payload(rendered)
 
     parsed = json.loads(payload)

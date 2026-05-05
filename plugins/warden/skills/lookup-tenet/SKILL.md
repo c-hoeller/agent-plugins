@@ -22,43 +22,22 @@ fallback** for the cases where auto-loading is not enough.
 
 ## How to look one up
 
-The Warden plugin sets the `CLAUDE_PLUGIN_ROOT` environment variable
-when its hooks fire, but this variable is **not guaranteed** inside
-auto-loaded skill tool calls. Resolve the plugin root once at the
-start of the lookup and reuse it:
+Resolve the plugin root once. `CLAUDE_PLUGIN_ROOT` is set by Claude Code
+when plugin tooling runs; if it's missing for any reason, fall back to a
+single glob:
 
 ```bash
-# Prefer the env var when available (set by Claude Code for plugin tooling).
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-}"
-
-# Fallback: search common install roots for a warden plugin directory that
-# carries a build/ folder (the marker that distinguishes it from a stub).
-if [ -z "$PLUGIN_ROOT" ] || [ ! -d "$PLUGIN_ROOT/build" ]; then
-  PLUGIN_ROOT="$(
-    for root in \
-        "$HOME/.claude/plugins" \
-        "$HOME/.config/claude-code/plugins" \
-        "./plugins" "."; do
-      [ -d "$root" ] || continue
-      find "$root" -maxdepth 4 -type d -name warden 2>/dev/null \
-        | while read -r d; do [ -d "$d/build" ] && echo "$d" && break; done
-    done | head -1
-  )"
+if [ -z "$PLUGIN_ROOT" ] || [ ! -f "$PLUGIN_ROOT/build/index.json" ]; then
+  PLUGIN_ROOT="$(ls -d "$HOME"/.claude/plugins/*/warden 2>/dev/null | head -1)"
 fi
+INDEX="$PLUGIN_ROOT/build/index.json"
 ```
-
-Once `$PLUGIN_ROOT` is known, two index forms are available:
-
-- `$PLUGIN_ROOT/build/index.md` — one-line-per-tenet, human-scannable.
-- `$PLUGIN_ROOT/build/index.json` — structured. Use this for any
-  query that involves filtering by tag, language, framework, or tier.
-  As the catalog grows past ~15 tenets, the markdown index is no
-  longer scan-friendly; the JSON index is.
 
 ### Discovery patterns
 
-Every query below assumes `INDEX="$PLUGIN_ROOT/build/index.json"` and
-that `jq` is on PATH (Claude Code ships with it).
+Every query below assumes `$INDEX` is set as above and that `jq` is on
+PATH (Claude Code ships with it).
 
 ```bash
 # By tag — "tenets that touch testing"
@@ -80,13 +59,6 @@ jq -r --arg q "validation" '
   .tenets[]
   | select((.title | ascii_downcase | contains($q)) or (.tags | index($q)))
   | .id + " — " + .title' "$INDEX"
-```
-
-If `jq` is unavailable for some reason, fall back to grepping
-`build/index.md`:
-
-```bash
-grep -E "tags:.*testing" "$PLUGIN_ROOT/build/index.md"
 ```
 
 ### Reading the full tenet body
