@@ -43,17 +43,26 @@ def _env_with(plugin_root: Path) -> dict[str, str]:
 
 
 def test_hook_emits_valid_session_start_payload():
+    # encoding="utf-8" pins decoding of the hook's stdout. Without it,
+    # subprocess.run(text=True) falls back to locale.getpreferredencoding()
+    # which on Windows runners is the ANSI codepage (cp1252 etc.) — the
+    # charter contains non-ASCII (em-dashes) and would silently corrupt.
     result = subprocess.run(
         _shell_invocation(),
         env=_env_with(PLUGIN_ROOT),
         capture_output=True,
         check=True,
         text=True,
+        encoding="utf-8",
         timeout=10,
     )
     payload = json.loads(result.stdout)
     assert payload["hookSpecificOutput"]["hookEventName"] == "SessionStart"
-    assert "Warden — Engineering Charter" in payload["hookSpecificOutput"]["additionalContext"]
+    # — is EM DASH. Spelled as a unicode escape so the matched literal
+    # is byte-for-byte deterministic regardless of how Python on the host
+    # decodes this source file. The literal in the actual charter is the
+    # same codepoint, just emitted via \xe2\x80\x94 from the JSON payload.
+    assert "Warden \u2014 Engineering Charter" in payload["hookSpecificOutput"]["additionalContext"]
 
 
 def test_hook_succeeds_with_missing_payload_and_warns_on_stderr(tmp_path: Path):
@@ -64,6 +73,7 @@ def test_hook_succeeds_with_missing_payload_and_warns_on_stderr(tmp_path: Path):
         env=_env_with(tmp_path),
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=10,
     )
     assert result.returncode == 0
