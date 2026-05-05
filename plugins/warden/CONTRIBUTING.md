@@ -32,6 +32,20 @@ uv sync          # Creates .venv and installs dev dependencies from uv.lock.
 That's it. There is no Make / shell-script bootstrap. The same command
 works in PowerShell, cmd.exe, bash, and zsh.
 
+### Optional: pre-commit hook
+
+To run `uv run poe ci` automatically before every commit that touches
+`plugins/warden/**` (catches build drift / lint / mypy / test
+regressions before they reach CI):
+
+```bash
+bash plugins/warden/scripts/install-hooks.sh
+```
+
+The hook is local to your clone — re-run after a fresh clone. Skips
+itself when no Warden files are staged, and degrades to a no-op when
+`uv` is not on PATH. Bypass once with `git commit --no-verify`.
+
 ## Day-to-day tasks
 
 Run any task with `uv run poe <task>`:
