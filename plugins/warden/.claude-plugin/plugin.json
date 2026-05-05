@@ -10,6 +10,5 @@
   "homepage": "https://github.com/c-hoeller/agent-plugins",
   "repository": "https://github.com/c-hoeller/agent-plugins",
   "keywords": ["coding-standards", "tenets", "anti-patterns", "best-practices"],
-  "skills": "./skills/",
-  "hooks": "./hooks/hooks.json"
+  "skills": "./skills/"
 }
