@@ -158,19 +158,24 @@ def test_render_skill_for_tenet_has_minimal_frontmatter(make_tenet, tenets_dir: 
     )
     tenets = warden_lib.load_all(tenets_dir)
     skill_name, content = warden_lib.render_skill_for_tenet(tenets[0])
+    frontmatter = content.split("---", 2)[1]
 
     assert skill_name == "et-0001-my-tenet"
     assert content.startswith("---\n")
-    assert f"name: {skill_name}" in content
-    # `description` MUST start with "Use when ..." — that is what the Claude
-    # Code Skill tool keys off for auto-invocation. Don't relax this test
-    # without re-validating that auto-load still works.
-    assert "description: Use when touching auth code; writing a login flow." in content
-    # Tenet ID and title must NOT appear in the description — they belong in
-    # the skill body. Workflow/identity material in the description risks
-    # Claude treating it as a shortcut and skipping the body.
-    assert "Tenet ET-0001" not in content.split("---", 2)[1]
-    assert "My tenet." not in content.split("---", 2)[1]
+    assert f"name: {skill_name}" in frontmatter
+    # `description` carries the tenet's identity (the imperative rule), so
+    # Claude can recognise the skill's purpose at a glance. The triggers live
+    # in `when_to_use` — see assertion below.
+    assert "description: My tenet." in frontmatter
+    # `when_to_use` MUST start with "Use when ..." and concatenate the
+    # triggers — that is what the Claude Code Skill tool keys off for
+    # auto-invocation. Don't relax this test without re-validating that
+    # auto-load still works.
+    assert "when_to_use: Use when touching auth code; writing a login flow." in frontmatter
+    # The tenet ID must NOT appear in the listing text — Claude reads the ID
+    # from the body once invoked. Putting it in the listing text crowds out
+    # trigger language without aiding match quality.
+    assert "ET-0001" not in frontmatter
 
 
 def test_render_skill_for_tenet_body_contains_all_required_sections(make_tenet, tenets_dir: Path):
@@ -196,16 +201,27 @@ def test_render_skill_emits_generated_marker(make_tenet, tenets_dir: Path):
     assert "do not edit by hand" in first_body_line
 
 
-def test_render_skill_description_truncates_at_hard_cap(make_tenet, tenets_dir: Path):
+def test_render_skill_when_to_use_keeps_combined_listing_under_cap(make_tenet, tenets_dir: Path):
+    # Combined `description` + `when_to_use` is what Claude Code caps in the
+    # listing. With 10 long triggers the when_to_use line alone would bust
+    # the cap; the renderer must truncate it so combined length fits.
     long_trigger = "x" * 195  # under per-trigger 200 cap, but enough to bust the total
     make_tenet(triggers=[long_trigger] * 10)
     tenets = warden_lib.load_all(tenets_dir)
     _, content = warden_lib.render_skill_for_tenet(tenets[0])
-    description_line = next(
-        line for line in content.splitlines() if line.startswith("description: ")
+    frontmatter = content.split("---", 2)[1]
+    description = next(
+        line[len("description: ") :]
+        for line in frontmatter.splitlines()
+        if line.startswith("description: ")
     )
-    description = description_line[len("description: ") :]
-    assert len(description) <= warden_lib.SKILL_DESCRIPTION_MAX_CHARS
+    when_to_use = next(
+        line[len("when_to_use: ") :]
+        for line in frontmatter.splitlines()
+        if line.startswith("when_to_use: ")
+    )
+    combined = f"{description} {when_to_use}"
+    assert len(combined) <= warden_lib.SKILL_LISTING_TEXT_MAX_CHARS
 
 
 def test_unscoped_description_usage_excludes_paths_scoped_tenets(make_tenet, tenets_dir: Path):
@@ -231,7 +247,9 @@ def test_unscoped_description_usage_excludes_paths_scoped_tenets(make_tenet, ten
     total, breakdown = warden_lib.unscoped_description_usage(tenets)
     ids = [tid for tid, _ in breakdown]
     assert ids == ["ET-0001"], f"only ET-0001 should be unscoped, got {ids}"
-    assert total == len(warden_lib._build_skill_description(tenets[0]))
+    # The unscoped budget tracks combined description + when_to_use, since
+    # that is what Claude Code caps in the global skill listing.
+    assert total == len(warden_lib._skill_listing_text(tenets[0]))
 
 
 def test_real_catalog_unscoped_description_usage_under_budget():

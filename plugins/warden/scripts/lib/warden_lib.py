@@ -40,12 +40,12 @@ REQUIRED_FRONTMATTER: tuple[str, ...] = (
     "triggers",
 )
 
-# Skill `description` (combined with `when_to_use`, if used) is capped at
-# 1,536 chars in the global skill listing per Claude Code Skills docs. We
-# keep a margin under that for safety and to leave room in the shared
-# description budget when many tenets are active. Raise cautiously — every
-# extra char per skill multiplies across the whole catalog.
-SKILL_DESCRIPTION_MAX_CHARS = 1400
+# Skill `description` + `when_to_use` text combined is capped at 1,536 chars
+# in the global skill listing per Claude Code Skills docs. We keep a margin
+# under that for safety and to leave room in the shared description budget
+# when many tenets are active. Raise cautiously — every extra char per skill
+# multiplies across the whole catalog.
+SKILL_LISTING_TEXT_MAX_CHARS = 1400
 
 # Combined budget for the descriptions of *all* unscoped tenet skills (i.e.
 # tenets without `paths:`, which therefore stay in the global match pool
@@ -356,26 +356,48 @@ def _skill_name_for(tenet: Tenet) -> str:
 
 
 def _build_skill_description(tenet: Tenet) -> str:
-    """Compose a Claude-Code skill `description` from a tenet's triggers.
+    """Compose a Claude-Code skill `description` from a tenet's title.
+
+    The description names *what* the skill is — the tenet's imperative rule —
+    so Claude can recognise the skill's purpose at a glance. The triggering
+    situations live in `when_to_use` (see `_build_skill_when_to_use`); keeping
+    them separate matches the docs' guidance ("description is what the skill
+    does, when_to_use is when to invoke it") and lets Claude weight the two
+    fields differently when matching.
+    """
+    return tenet.title.rstrip(".") + "."
+
+
+def _build_skill_when_to_use(tenet: Tenet) -> str:
+    """Compose a Claude-Code skill `when_to_use` field from a tenet's triggers.
 
     Format: 'Use when <trigger 1>; <trigger 2>; ....'
-    Only triggering conditions belong in the description — the tenet ID and
-    title live in the skill body, where Claude reads them once auto-invoked.
-    Polluting the description with workflow/identity material risks Claude
-    treating the description as a shortcut and skipping the skill body.
 
-    Front-loaded triggers also matter because the description (combined with
-    `when_to_use` if set) is capped at 1,536 chars in the global skill listing;
-    when the shared description budget tightens, the first trigger is what
-    survives truncation.
+    Front-loaded triggers matter because the `description` + `when_to_use`
+    text combined is capped at 1,536 chars in the global skill listing; when
+    the shared description budget tightens, the first trigger is what
+    survives truncation. The hard cap below keeps combined length under
+    SKILL_LISTING_TEXT_MAX_CHARS as a safety net.
     """
     triggers = "; ".join(t.strip().rstrip(".") for t in tenet.triggers if t.strip())
-    description = f"Use when {triggers}."
-    if len(description) > SKILL_DESCRIPTION_MAX_CHARS:
-        # Hard cap as a safety net. Validation also limits each trigger to 200
-        # chars, so reaching this should be rare.
-        description = description[: SKILL_DESCRIPTION_MAX_CHARS - 1].rstrip() + "…"
-    return description
+    when_to_use = f"Use when {triggers}."
+    description_overhead = len(_build_skill_description(tenet)) + len(" ")
+    cap = SKILL_LISTING_TEXT_MAX_CHARS - description_overhead
+    if len(when_to_use) > cap:
+        # Validation also limits each trigger to 200 chars, so reaching this
+        # should be rare. The ellipsis signals truncation in the listing.
+        when_to_use = when_to_use[: cap - 1].rstrip() + "…"
+    return when_to_use
+
+
+def _skill_listing_text(tenet: Tenet) -> str:
+    """Return the combined description + when_to_use text Claude Code lists.
+
+    Mirrors how the skill-listing budget is computed: the two fields are
+    concatenated with a separator. Used by `unscoped_description_usage` to
+    measure each tenet's contribution to the shared budget.
+    """
+    return f"{_build_skill_description(tenet)} {_build_skill_when_to_use(tenet)}"
 
 
 def unscoped_description_usage(tenets: Iterable[Tenet]) -> tuple[int, list[tuple[str, int]]]:
@@ -383,10 +405,12 @@ def unscoped_description_usage(tenets: Iterable[Tenet]) -> tuple[int, list[tuple
 
     Only unscoped tenets compete in the global description-match pool on every
     prompt; tenets with `paths:` are gated by file-glob and don't count here.
-    The breakdown is sorted descending so the largest contributors surface
-    first when a budget violation is reported.
+    Each tenet's contribution is the combined description + when_to_use text,
+    matching the cap Claude Code applies in the listing. The breakdown is
+    sorted descending so the largest contributors surface first when a budget
+    violation is reported.
     """
-    breakdown = [(t.id, len(_build_skill_description(t))) for t in tenets if not t.paths]
+    breakdown = [(t.id, len(_skill_listing_text(t))) for t in tenets if not t.paths]
     breakdown.sort(key=lambda pair: pair[1], reverse=True)
     return sum(chars for _, chars in breakdown), breakdown
 
@@ -401,6 +425,7 @@ def render_skill_for_tenet(tenet: Tenet) -> tuple[str, str]:
     """
     skill_name = _skill_name_for(tenet)
     description = _build_skill_description(tenet)
+    when_to_use = _build_skill_when_to_use(tenet)
 
     # `user-invocable: false` keeps generated tenet skills out of the `/` menu.
     # They are background knowledge that auto-loads via triggers / paths; no
@@ -410,6 +435,7 @@ def render_skill_for_tenet(tenet: Tenet) -> tuple[str, str]:
         "---",
         f"name: {skill_name}",
         f"description: {description}",
+        f"when_to_use: {when_to_use}",
         "user-invocable: false",
     ]
     if tenet.paths:
