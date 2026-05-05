@@ -4,7 +4,7 @@ title: Pass dependencies explicitly; no global lookups inside units
 type: anti-pattern
 tier: 1
 applies-to: any
-since: 0.1.0
+since: 0.2.0
 triggers:
   - calling a module-level singleton, service locator, or static accessor from inside a function or class method
   - writing a class that constructs its own database / HTTP / queue client in the constructor

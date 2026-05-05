@@ -1,6 +1,6 @@
 [project]
 name = "warden-build"
-version = "0.1.0"
+version = "0.2.0"
 description = "Build and validation tooling for the Warden Engineering Tenets plugin."
 requires-python = ">=3.10"
 dependencies = []

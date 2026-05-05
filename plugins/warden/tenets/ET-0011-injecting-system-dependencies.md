@@ -4,7 +4,7 @@ title: Inject time, randomness, and IO; never read them ambiently
 type: anti-pattern
 tier: 1
 applies-to: any
-since: 0.1.0
+since: 0.2.0
 triggers:
   - calling `DateTime.UtcNow` / `Date.now()` / `datetime.now()` inside business logic
   - calling `Random` / `Math.random()` / `random.random()` / `Guid.NewGuid()` to make a decision domain code depends on

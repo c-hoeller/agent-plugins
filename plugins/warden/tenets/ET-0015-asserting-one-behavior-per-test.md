@@ -4,7 +4,7 @@ title: Assert one behavior per test
 type: best-practice
 tier: 1
 applies-to: any
-since: 0.1.0
+since: 0.2.0
 triggers:
   - writing a test whose body covers two unrelated behaviors with the same setup
   - naming a test `test_login_and_signup_and_password_reset` or similar conjunction-named test

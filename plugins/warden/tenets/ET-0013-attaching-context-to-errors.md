@@ -4,7 +4,7 @@ title: Attach diagnostic context to errors; preserve the cause chain
 type: best-practice
 tier: 1
 applies-to: any
-since: 0.1.0
+since: 0.2.0
 triggers:
   - raising or throwing an exception with only a string message
   - logging an error that names the failure but not the inputs / IDs needed to reproduce it

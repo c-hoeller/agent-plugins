@@ -4,7 +4,7 @@ title: Keep decisions pure; isolate effects in a thin shell
 type: best-practice
 tier: 1
 applies-to: any
-since: 0.1.0
+since: 0.2.0
 triggers:
   - writing a function that mixes domain decisions with database / HTTP / filesystem calls
   - needing to mock half a class to test the other half

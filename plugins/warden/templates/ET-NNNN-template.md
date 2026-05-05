@@ -33,7 +33,7 @@ applies-to: any
 # introduced. Frozen — never updated later, even on substantial rewrites.
 # Validation rejects non-SemVer values (no pre-release suffixes, no `v`
 # prefix, no two-segment forms).
-since: 0.1.0
+since: 0.2.0
 
 # 3–5 short, action-shaped phrases describing situations where this tenet
 # should auto-load. They become the generated skill's `description`,

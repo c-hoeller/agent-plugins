@@ -153,7 +153,7 @@
         "ET-0006",
         "ET-0007"
       ],
-      "since": "0.1.0",
+      "since": "0.2.0",
       "skill": "et-0008-making-illegal-states-unrepresentable"
     },
     {
@@ -174,7 +174,7 @@
         "ET-0010",
         "ET-0011"
       ],
-      "since": "0.1.0",
+      "since": "0.2.0",
       "skill": "et-0009-separating-decisions-from-effects"
     },
     {
@@ -194,7 +194,7 @@
         "ET-0011",
         "ET-0014"
       ],
-      "since": "0.1.0",
+      "since": "0.2.0",
       "skill": "et-0010-passing-dependencies-explicitly"
     },
     {
@@ -215,7 +215,7 @@
         "ET-0009",
         "ET-0010"
       ],
-      "since": "0.1.0",
+      "since": "0.2.0",
       "skill": "et-0011-injecting-system-dependencies"
     },
     {
@@ -235,7 +235,7 @@
         "ET-0003",
         "ET-0011"
       ],
-      "since": "0.1.0",
+      "since": "0.2.0",
       "skill": "et-0012-validating-config-at-startup"
     },
     {
@@ -253,7 +253,7 @@
       "related": [
         "ET-0002"
       ],
-      "since": "0.1.0",
+      "since": "0.2.0",
       "skill": "et-0013-attaching-context-to-errors"
     },
     {
@@ -273,7 +273,7 @@
         "ET-0011",
         "ET-0015"
       ],
-      "since": "0.1.0",
+      "since": "0.2.0",
       "skill": "et-0014-keeping-tests-independent"
     },
     {
@@ -292,7 +292,7 @@
         "ET-0004",
         "ET-0014"
       ],
-      "since": "0.1.0",
+      "since": "0.2.0",
       "skill": "et-0015-asserting-one-behavior-per-test"
     }
   ]

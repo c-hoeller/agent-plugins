@@ -4,7 +4,7 @@ title: Make illegal states unrepresentable
 type: best-practice
 tier: 1
 applies-to: any
-since: 0.1.0
+since: 0.2.0
 triggers:
   - introducing a new type whose fields can combine into a state that has no domain meaning
   - modeling status with a free-form string and optional fields where some combinations are nonsense

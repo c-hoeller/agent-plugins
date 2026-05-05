@@ -4,7 +4,7 @@ title: Keep tests independent and order-agnostic
 type: anti-pattern
 tier: 1
 applies-to: any
-since: 0.1.0
+since: 0.2.0
 triggers:
   - writing a test that depends on data left behind by a previous test
   - using a module-level fixture or class-level mutable variable to share state between tests

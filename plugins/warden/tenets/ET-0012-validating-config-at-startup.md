@@ -4,7 +4,7 @@ title: Load and validate configuration at startup, not at first use
 type: best-practice
 tier: 1
 applies-to: any
-since: 0.1.0
+since: 0.2.0
 triggers:
   - reading an environment variable / config file value at the point where it is first used
   - writing a configuration class whose fields are typed as `string?` because they may be missing
