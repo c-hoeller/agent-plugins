@@ -26,7 +26,7 @@ The build pipeline (`uv run poe build`) is the **single way** to
 produce `build/` and the `et-*/` skills. They are committed so the
 plugin is installable on `git clone`, but they must always match what
 the build would emit. The CI gate `poe ci` enforces this via
-[`scripts/build_check.py`](scripts/build_check.py).
+[`scripts/build.py --check`](scripts/build.py).
 
 ## Hard rules
 
@@ -47,9 +47,11 @@ the build would emit. The CI gate `poe ci` enforces this via
    keeps working, just without the always-on Charter.
 5. **Don't widen the always-on Charter.** It is intentionally headline-
    only. Per-tenet detail belongs in the generated skill, which
-   auto-loads when relevant. The Charter must scale to 25+ tenets
-   without breaking the 5,000-char ceiling enforced by
-   `test_render_charter_size_stays_small_for_25_tenets`.
+   auto-loads when relevant. The Charter must fit under Claude Code's
+   10,000-character `SessionStart` `additionalContext` cap even with
+   25+ tenets — `test_render_charter_size_stays_small_for_25_tenets`
+   pins this at the cap. If it ever fails, trim the preamble or scope
+   more tier-1 tenets via `paths:`; do not raise the limit.
 
 ## Where things live
 

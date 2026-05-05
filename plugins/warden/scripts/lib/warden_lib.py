@@ -17,6 +17,10 @@ import yaml
 
 ID_RE = re.compile(r"^ET-(\d{4})$")
 FILENAME_RE = re.compile(r"^(ET-\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
+# `since` must be plain MAJOR.MINOR.PATCH so it is comparable with the plugin's
+# `pyproject.toml` version. Pre-release / build-metadata suffixes are not allowed
+# — tenets ship with the plugin and inherit its version semantics.
+SINCE_RE = re.compile(r"^\d+\.\d+\.\d+$")
 
 TYPES = ("best-practice", "anti-pattern")
 TIERS = (1, 2)
@@ -244,9 +248,19 @@ def validate(tenets: Iterable[Tenet]) -> list[WardenError]:
         # and non-empty; the shape (string or mapping) is left to authors.
         if t.applies_to is None or (isinstance(t.applies_to, str) and not t.applies_to.strip()):
             errors.append(WardenError(t.path, "applies-to must be present and non-empty"))
-        # since is documentation. Require non-empty; do not validate as SemVer.
-        if not t.since.strip():
+        # since records the plugin version in which the tenet was introduced.
+        # Enforced as MAJOR.MINOR.PATCH so the field stays comparable with the
+        # plugin's `pyproject.toml` version rather than drifting into free text.
+        since = t.since.strip()
+        if not since:
             errors.append(WardenError(t.path, "since must be present and non-empty"))
+        elif not SINCE_RE.match(since):
+            errors.append(
+                WardenError(
+                    t.path,
+                    f"since {t.since!r} must be SemVer MAJOR.MINOR.PATCH (e.g. '0.1.0')",
+                )
+            )
         # triggers — required, non-empty list of short trigger phrases. These
         # become the basis of the generated skill's `description`, which is
         # what Claude Code matches against to auto-load the tenet's skill.

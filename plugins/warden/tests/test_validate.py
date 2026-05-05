@@ -41,10 +41,30 @@ def test_invalid_tier_is_flagged(make_tenet, tenets_dir: Path):
 
 
 def test_since_must_be_non_empty(make_tenet, tenets_dir: Path):
-    # `since` is documentation-only; we only require non-empty (no SemVer check).
     make_tenet(since="")
     errors = _validate(tenets_dir)
     assert any("since" in e.message for e in errors)
+
+
+def test_since_must_be_semver(make_tenet, tenets_dir: Path):
+    # `since` is enforced as MAJOR.MINOR.PATCH so it stays comparable with the
+    # plugin's pyproject.toml version. Reject pre-release suffixes, two-segment
+    # forms, and free text.
+    for bad in ("0.1", "0.1.0-beta", "1.0.0+meta", "v0.1.0", "next"):
+        make_tenet(id="ET-9999", slug="bad-since", since=bad)
+        errors = _validate(tenets_dir)
+        assert any("MAJOR.MINOR.PATCH" in e.message for e in errors), (
+            f"expected SemVer error for since={bad!r}, got {[e.message for e in errors]}"
+        )
+        # Reset so the next iteration's tenet write replaces this one.
+        (tenets_dir / "ET-9999-bad-since.md").unlink()
+
+
+def test_since_accepts_valid_semver(make_tenet, tenets_dir: Path):
+    for good in ("0.1.0", "1.0.0", "10.20.30"):
+        make_tenet(id="ET-9999", slug="good-since", since=good)
+        assert _validate(tenets_dir) == [], f"unexpected errors for since={good!r}"
+        (tenets_dir / "ET-9999-good-since.md").unlink()
 
 
 def test_applies_to_mapping_form_is_accepted(make_tenet, tenets_dir: Path):
