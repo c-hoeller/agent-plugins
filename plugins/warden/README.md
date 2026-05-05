@@ -45,8 +45,10 @@ index line, so adding tenets does not balloon the always-on context
 budget. Per-tenet detail lives in skills and only enters context when
 relevant.
 
-**Tier 1** = universal, language-agnostic. Listed in the Charter index.
-`paths:` is optional — universal tenets stay eligible everywhere.
+**Tier 1** = universal principles. Listed in the Charter index.
+`paths:` is optional — add it only when the principle is universal but
+only applies to languages that have the relevant feature (e.g. access
+modifiers exist in TS / Java / C# but not in Python or JS).
 **Tier 2** = language- or framework-specific. Not listed in the
 Charter; auto-loads via skill triggers gated by a **required** `paths:`
 glob. Validation rejects tier 2 without `paths:` — an unscoped tier 2
@@ -74,7 +76,7 @@ plugins/warden/
 │   └── et-NNNN-<slug>/           # generated: one auto-loadable skill per tenet
 ├── tenets/                       # source of truth — one file per tenet
 ├── templates/ET-NNNN-template.md # starting point for a new tenet
-├── build/                        # generated, committed (charter + index.json)
+├── build/                        # generated, committed (charter.md, charter.json, index.json)
 ├── scripts/                      # build/validation tooling — see CONTRIBUTING.md
 ├── tests/                        # pytest suite
 └── pyproject.toml                # uv-managed deps + tool config

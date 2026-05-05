@@ -50,8 +50,11 @@ the build would emit. The CI gate `poe ci` enforces this via
    auto-loads when relevant. The Charter must fit under Claude Code's
    10,000-character `SessionStart` `additionalContext` cap even with
    25+ tenets — `test_render_charter_size_stays_small_for_25_tenets`
-   pins this at the cap. If it ever fails, trim the preamble or scope
-   more tier-1 tenets via `paths:`; do not raise the limit.
+   pins this at the cap. If it ever fails, trim the preamble or demote
+   borderline tier-1 tenets to tier 2 (which removes them from the
+   Charter index and gates them on `paths:`); do not raise the limit.
+   Note that adding `paths:` to a tier-1 tenet does *not* shrink the
+   Charter — it appends a `· scoped` marker to that line.
 
 ## Where things live
 
@@ -63,6 +66,7 @@ the build would emit. The CI gate `poe ci` enforces this via
 | Build entry point                    | [`scripts/build.py`](scripts/build.py)                |
 | CI build-drift check                 | [`scripts/build.py --check`](scripts/build.py)        |
 | Standalone validation                | [`scripts/validate.py`](scripts/validate.py)          |
+| Optional pre-commit hook installer   | [`scripts/install-hooks.sh`](scripts/install-hooks.sh) |
 | SessionStart hook wrapper (polyglot) | [`hooks/run-hook.cmd`](hooks/run-hook.cmd)            |
 | SessionStart hook payload (bash)     | [`hooks/session-start`](hooks/session-start)          |
 | Hook registration                    | [`hooks/hooks.json`](hooks/hooks.json)                |
@@ -104,10 +108,12 @@ the build would emit. The CI gate `poe ci` enforces this via
   than as negated ones ("never X"); the Rule body keeps the hard
   "Never". Skill descriptions read as "when to use" prose; the
   imperative belongs in the Rule.
-- **Front-load the strongest trigger** — skill `description` is capped
-  at 1,536 chars in the global skill listing (per [Claude Code Skills
-  docs](https://code.claude.com/docs/en/skills)); the first trigger is
-  what survives any truncation when the shared budget tightens.
+- **Front-load the strongest trigger** — the build emits triggers into
+  the skill's `when_to_use` field, and the combined `description +
+  when_to_use` text is capped at 1,536 chars in the global skill
+  listing (per [Claude Code Skills docs](https://code.claude.com/docs/en/skills));
+  the first trigger is what survives any truncation when the shared
+  budget tightens.
 - **Use `paths:` to scope language-specific tenets** — it's more
   deterministic than description matching and frees the global
   description budget. Omit `paths:` only for genuinely

@@ -1,6 +1,6 @@
-# claude-plugins
+# hoeller-agent-plugins
 
-Claude Code plugin marketplace by omnivex labs.
+Claude Code plugin marketplace.
 
 ## Available plugins
 
@@ -12,9 +12,9 @@ Claude Code plugin marketplace by omnivex labs.
 
 In a Claude Code session:
 
-```
+```text
 /plugin marketplace add <git-url-of-this-repo>
-/plugin install warden@claude-plugins
+/plugin install warden@hoeller-agent-plugins
 ```
 
 The marketplace exposes each plugin as a separate installable. Install
