@@ -134,6 +134,166 @@
       ],
       "since": "0.1.0",
       "skill": "et-0007-avoiding-any-and-unchecked-casts"
+    },
+    {
+      "id": "ET-0008",
+      "title": "Make illegal states unrepresentable",
+      "type": "best-practice",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "types",
+        "modeling",
+        "invariants",
+        "design"
+      ],
+      "related": [
+        "ET-0003",
+        "ET-0006",
+        "ET-0007"
+      ],
+      "since": "0.1.0",
+      "skill": "et-0008-making-illegal-states-unrepresentable"
+    },
+    {
+      "id": "ET-0009",
+      "title": "Keep decisions pure; isolate effects in a thin shell",
+      "type": "best-practice",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "architecture",
+        "testing",
+        "purity",
+        "side-effects"
+      ],
+      "related": [
+        "ET-0004",
+        "ET-0010",
+        "ET-0011"
+      ],
+      "since": "0.1.0",
+      "skill": "et-0009-separating-decisions-from-effects"
+    },
+    {
+      "id": "ET-0010",
+      "title": "Pass dependencies explicitly; no global lookups inside units",
+      "type": "anti-pattern",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "dependency-injection",
+        "testability",
+        "coupling"
+      ],
+      "related": [
+        "ET-0009",
+        "ET-0011",
+        "ET-0014"
+      ],
+      "since": "0.1.0",
+      "skill": "et-0010-passing-dependencies-explicitly"
+    },
+    {
+      "id": "ET-0011",
+      "title": "Inject time, randomness, and IO; never read them ambiently",
+      "type": "anti-pattern",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "testability",
+        "determinism",
+        "dependencies",
+        "time",
+        "randomness"
+      ],
+      "related": [
+        "ET-0009",
+        "ET-0010"
+      ],
+      "since": "0.1.0",
+      "skill": "et-0011-injecting-system-dependencies"
+    },
+    {
+      "id": "ET-0012",
+      "title": "Load and validate configuration at startup, not at first use",
+      "type": "best-practice",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "configuration",
+        "startup",
+        "validation",
+        "fail-fast"
+      ],
+      "related": [
+        "ET-0003",
+        "ET-0011"
+      ],
+      "since": "0.1.0",
+      "skill": "et-0012-validating-config-at-startup"
+    },
+    {
+      "id": "ET-0013",
+      "title": "Attach diagnostic context to errors; preserve the cause chain",
+      "type": "best-practice",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "error-handling",
+        "observability",
+        "diagnostics"
+      ],
+      "related": [
+        "ET-0002"
+      ],
+      "since": "0.1.0",
+      "skill": "et-0013-attaching-context-to-errors"
+    },
+    {
+      "id": "ET-0014",
+      "title": "Keep tests independent and order-agnostic",
+      "type": "anti-pattern",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "testing",
+        "isolation",
+        "reliability"
+      ],
+      "related": [
+        "ET-0010",
+        "ET-0011",
+        "ET-0015"
+      ],
+      "since": "0.1.0",
+      "skill": "et-0014-keeping-tests-independent"
+    },
+    {
+      "id": "ET-0015",
+      "title": "Assert one behavior per test",
+      "type": "best-practice",
+      "tier": 1,
+      "applies_to": "any",
+      "paths": [],
+      "tags": [
+        "testing",
+        "assertions",
+        "focus"
+      ],
+      "related": [
+        "ET-0004",
+        "ET-0014"
+      ],
+      "since": "0.1.0",
+      "skill": "et-0015-asserting-one-behavior-per-test"
     }
   ]
 }

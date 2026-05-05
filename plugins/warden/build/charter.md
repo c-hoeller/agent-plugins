@@ -23,5 +23,13 @@ This session is governed by Warden Engineering Tenets (ET-NNNN). Tenets are **bi
 - `ET-0004` — Tests assert observable behavior, not implementation → skill `et-0004-asserting-observable-behavior`
 - `ET-0005` — Comments explain why, not what → skill `et-0005-writing-comments-that-explain-why`
 - `ET-0006` — Names describe the domain, not the implementation → skill `et-0006-naming-after-the-domain`
+- `ET-0008` — Make illegal states unrepresentable → skill `et-0008-making-illegal-states-unrepresentable`
+- `ET-0009` — Keep decisions pure; isolate effects in a thin shell → skill `et-0009-separating-decisions-from-effects`
+- `ET-0010` — Pass dependencies explicitly; no global lookups inside units → skill `et-0010-passing-dependencies-explicitly`
+- `ET-0011` — Inject time, randomness, and IO; never read them ambiently → skill `et-0011-injecting-system-dependencies`
+- `ET-0012` — Load and validate configuration at startup, not at first use → skill `et-0012-validating-config-at-startup`
+- `ET-0013` — Attach diagnostic context to errors; preserve the cause chain → skill `et-0013-attaching-context-to-errors`
+- `ET-0014` — Keep tests independent and order-agnostic → skill `et-0014-keeping-tests-independent`
+- `ET-0015` — Assert one behavior per test → skill `et-0015-asserting-one-behavior-per-test`
 
 ## Tier 2 — context-specific (auto-load via triggers, or browse via `lookup-tenet`; 1 total)
