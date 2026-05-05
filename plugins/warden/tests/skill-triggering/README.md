@@ -140,6 +140,20 @@ Exit codes from `run-test.sh`:
 `--expect-present` and each `<skill>/negative/` directory with
 `--expect-absent`. Both classes count toward the suite's pass/fail total.
 
+Scenarios run concurrently (default: 4 in parallel). Override via
+`WARDEN_BEHAVIOR_TEST_PARALLEL=N`:
+
+```bash
+WARDEN_BEHAVIOR_TEST_PARALLEL=8 uv run poe behavior-test   # faster, may hit API rate limits
+WARDEN_BEHAVIOR_TEST_PARALLEL=1 uv run poe behavior-test   # strictly sequential
+```
+
+Each test still streams its verdict line as it lands; the suite prints a
+`Failures:` block listing every non-passing verdict, then a final tally.
+Run order is no longer deterministic across the suite (it depends on which
+worker finishes first), but every individual verdict line stays intact —
+verdicts are written atomically per test.
+
 ## Reading the output
 
 The harness streams a one-line verdict per test. Positive scenarios use
