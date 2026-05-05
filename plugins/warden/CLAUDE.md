@@ -11,9 +11,11 @@ Each tenet is one binding rule with `Rule` / `Why` / `Bad Example` /
 `Good Example` / `Exceptions` (and optional `Rationalizations`). Tenets
 reach Claude Code sessions via two mechanisms:
 
-- A small always-on **Charter** injected by a `SessionStart` hook
-  ([`hooks/inject-charter.cmd`](hooks/inject-charter.cmd)) that lists
-  every Tier 1 tenet by ID.
+- A small always-on **Charter** injected by a `SessionStart` hook —
+  a polyglot wrapper [`hooks/run-hook.cmd`](hooks/run-hook.cmd) that
+  dispatches to the extensionless bash script
+  [`hooks/session-start`](hooks/session-start) — that lists every
+  Tier 1 tenet by ID.
 - One **auto-loadable skill per tenet** under
   [`skills/et-NNNN-<slug>/`](skills/), generated from the source
   tenet by [`scripts/build.py`](scripts/build.py). The skill loads
@@ -38,9 +40,12 @@ the build would emit. The CI gate `poe ci` enforces this via
    hand-authored** — `_clean_generated_skills` only touches `et-*`
    prefixed dirs, so these are safe, but check before deleting
    anything in `skills/`.
-4. **No new runtime dependencies in the hook.** The polyglot
-   `inject-charter.cmd` is intentionally limited to POSIX `sh + cat`
-   and `cmd.exe + type`. Anything beyond that breaks Windows installs.
+4. **No new runtime dependencies in the hook.** The wrapper
+   `run-hook.cmd` is intentionally limited to POSIX `sh + cat` (Unix)
+   and `cmd.exe` locating `bash.exe` from Git for Windows / MSYS2 /
+   Cygwin (Windows). Anything beyond that breaks Windows installs.
+   Windows users without bash see a silent `exit /b 0` — the plugin
+   keeps working, just without the always-on Charter.
 5. **Don't widen the always-on Charter.** It is intentionally headline-
    only. Per-tenet detail belongs in the generated skill, which
    auto-loads when relevant. The Charter must scale to 25+ tenets
@@ -57,7 +62,8 @@ the build would emit. The CI gate `poe ci` enforces this via
 | Build entry point                    | [`scripts/build.py`](scripts/build.py)                |
 | CI build-drift check                 | [`scripts/build_check.py`](scripts/build_check.py)    |
 | Standalone validation                | [`scripts/validate.py`](scripts/validate.py)          |
-| SessionStart hook (polyglot)         | [`hooks/inject-charter.cmd`](hooks/inject-charter.cmd) |
+| SessionStart hook wrapper (polyglot) | [`hooks/run-hook.cmd`](hooks/run-hook.cmd)            |
+| SessionStart hook payload (bash)     | [`hooks/session-start`](hooks/session-start)          |
 | Hook registration                    | [`hooks/hooks.json`](hooks/hooks.json)                |
 | Generated Charter (committed)        | [`build/charter.md`](build/charter.md), [`build/charter.json`](build/charter.json) |
 | Generated index (committed)          | [`build/index.md`](build/index.md)                    |
@@ -121,11 +127,22 @@ the build would emit. The CI gate `poe ci` enforces this via
 
 ## Things to know that aren't obvious from the code
 
-- **The polyglot hook script is fragile by design.** Don't reformat
-  [`inject-charter.cmd`](hooks/inject-charter.cmd) — the
-  `: << 'CMDBLOCK'` heredoc, `@echo off` line, and `CMDBLOCK` marker
-  position are load-bearing. If you change anything there, manually
-  test on both `/bin/sh` and `cmd.exe`.
+- **The polyglot wrapper is fragile by design.** Don't reformat
+  [`run-hook.cmd`](hooks/run-hook.cmd) — the `:<<'CMDBLOCK'` heredoc,
+  `@echo off` line, the `CMDBLOCK` marker position, and the trailing
+  `#…` comment on the `exec bash` line are all load-bearing. The file
+  is pinned to CRLF in `.gitattributes`: `cmd.exe` mangles LF-only
+  `.cmd` scripts (echo-off doesn't take effect), while the sh side
+  tolerates the trailing `\r` on each line because the heredoc
+  terminator is matched with-`\r`-on-both-ends and the exec line's
+  trailing comment absorbs the carriage return before it can corrupt
+  the path argument. If you change anything there, manually test on
+  both `/bin/sh` and `cmd.exe`.
+- **The actual hook payload lives in [`session-start`](hooks/session-start),
+  not the wrapper.** The wrapper only finds bash and dispatches; all
+  real logic (reading `build/charter.json`, the missing-payload
+  warning) belongs in the bash script. The wrapper is reusable for
+  future hooks via the `script-name` argument.
 - **JSON escaping is done at build time, not at runtime.** The hook
   must `cat`/`type` the file verbatim. If you ever consider a
   templated runtime JSON, stop — the whole point of the build-time

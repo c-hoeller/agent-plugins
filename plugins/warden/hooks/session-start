@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Warden SessionStart hook payload — pure POSIX bash, no polyglot tricks.
+#
+# Hook contract: write build/charter.json to stdout. The file is a pre-built
+# JSON payload of the form
+#   {"hookSpecificOutput": {"hookEventName": "SessionStart",
+#    "additionalContext": "<rendered markdown>"}}
+# Claude Code parses it and injects additionalContext into the session.
+#
+# JSON escaping is done at build time so this script needs no JSON tooling.
+# Missing payload is logged to stderr and exits 0 — the session is never blocked.
+#
+# Invoked directly by /bin/sh on POSIX hosts and via run-hook.cmd → bash on
+# Windows hosts (Git for Windows / MSYS2 / Cygwin).
+
+payload="${CLAUDE_PLUGIN_ROOT}/build/charter.json"
+if [ -f "$payload" ]; then
+    cat "$payload"
+else
+    echo "warden: charter.json missing — run 'uv run poe build'" >&2
+fi
+exit 0

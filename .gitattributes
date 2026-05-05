@@ -10,6 +10,13 @@
 *.yml   text eol=lf
 *.yaml  text eol=lf
 
+# Windows .cmd / .bat files MUST be CRLF — cmd.exe garbles LF-only batch files
+# (echo off doesn't take effect, line buffering breaks). The polyglot wrapper
+# in plugins/warden/hooks/run-hook.cmd is intentionally written so the sh-side
+# tolerates the CRLF (single-quoted heredoc + trailing-comment exec line).
+*.cmd   text eol=crlf
+*.bat   text eol=crlf
+
 # Treat these as binary so git never converts them.
 *.png   binary
 *.jpg   binary

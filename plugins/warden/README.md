@@ -53,13 +53,15 @@ glob. Validation rejects tier 2 without `paths:` — an unscoped tier 2
 tenet would compete in the global description-match pool against every
 other skill and break the budget once the catalog grows.
 
-The `SessionStart` hook ([`hooks/inject-charter.cmd`](hooks/inject-charter.cmd))
-is a polyglot Windows-`.cmd` / POSIX-shell script — the same file
-runs as a batch script under `cmd.exe` and as a shell script under
-`/bin/sh`. **No external runtime dependency is required**: only
-POSIX `sh` + `cat` (Unix) and `cmd.exe` + `type` (Windows), both of
-which are part of every base system. JSON escaping is done at build
-time, so no shell-side escaping ever runs.
+The `SessionStart` hook is split across two files:
+[`hooks/run-hook.cmd`](hooks/run-hook.cmd) is a polyglot Windows-`.cmd`
+/ POSIX-shell wrapper, and [`hooks/session-start`](hooks/session-start)
+is the extensionless bash script with the actual logic. On POSIX,
+`/bin/sh` heredoc-discards the cmd block in the wrapper and exec-bashes
+`session-start` directly. On Windows, `cmd.exe` runs the batch block,
+locates `bash.exe` (Git for Windows / MSYS2 / Cygwin), and invokes
+`session-start` through it. JSON escaping is done at build time, so no
+shell-side escaping ever runs.
 
 ## Repository layout
 

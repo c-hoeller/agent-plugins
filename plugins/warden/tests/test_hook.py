@@ -1,14 +1,16 @@
-"""Smoke test for hooks/inject-charter.cmd on both polyglot branches.
+"""Smoke tests for the SessionStart hook on both polyglot branches.
 
-The hook is a polyglot script: cmd.exe runs the batch block, /bin/sh runs
-the shell block. Each test platform exercises the branch native to its
-shell — POSIX hosts run the sh branch, Windows runs the cmd.exe branch.
-Both must produce the same JSON-shaped SessionStart payload.
+The hook is split across two files:
+  - `hooks/run-hook.cmd`  — polyglot wrapper (cmd.exe + /bin/sh).
+  - `hooks/session-start` — extensionless bash script with the actual logic.
 
-What this guards: any future edit to the polyglot heredoc structure that
-breaks one branch — e.g. accidentally consuming the heredoc marker,
-leaving an unquoted variable, or rewording the missing-payload warning —
-fails here before it reaches a user session.
+POSIX hosts exercise the wrapper through /bin/sh (it heredoc-discards the cmd
+block and exec-bashes the named script). Windows hosts exercise the wrapper
+through cmd.exe (it locates bash.exe and invokes the script through it).
+
+What this guards: any future edit to the polyglot heredoc structure, the exec
+trampoline line, or the missing-payload warning that breaks one branch — fails
+here before it reaches a user session.
 """
 
 from __future__ import annotations
@@ -21,14 +23,15 @@ import sys
 from pathlib import Path
 
 PLUGIN_ROOT = Path(__file__).resolve().parent.parent
-HOOK = PLUGIN_ROOT / "hooks" / "inject-charter.cmd"
+WRAPPER = PLUGIN_ROOT / "hooks" / "run-hook.cmd"
+SCRIPT_NAME = "session-start"
 
 
 def _shell_invocation() -> list[str]:
     if sys.platform == "win32":
-        return ["cmd.exe", "/c", str(HOOK)]
+        return ["cmd.exe", "/c", str(WRAPPER), SCRIPT_NAME]
     sh = shutil.which("sh") or "/bin/sh"
-    return [sh, str(HOOK)]
+    return [sh, str(WRAPPER), SCRIPT_NAME]
 
 
 def _env_with(plugin_root: Path) -> dict[str, str]:

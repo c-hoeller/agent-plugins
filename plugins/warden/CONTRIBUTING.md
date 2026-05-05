@@ -82,9 +82,12 @@ on every push to `main` and every pull request that touches
 `plugins/warden/**`. The workflow runs `poe ci` on a matrix of
 **`macos-latest`** and **`windows-latest`** — both supported plugin
 runtime targets. The Windows runner is what actually exercises the
-`cmd.exe` branch of [`hooks/inject-charter.cmd`](hooks/inject-charter.cmd);
-the macOS runner exercises the POSIX-shell branch. A polyglot-script
-edit that breaks one branch fails CI before any user session sees it.
+`cmd.exe` branch of [`hooks/run-hook.cmd`](hooks/run-hook.cmd) (which
+locates `bash.exe` and invokes [`hooks/session-start`](hooks/session-start));
+the macOS runner exercises the `/bin/sh` branch (which heredoc-skips
+the cmd block and exec-bashes `session-start` directly). A polyglot-
+wrapper edit that breaks one branch fails CI before any user session
+sees it.
 
 Linux is omitted from the matrix intentionally — add it back if a
 Linux user ever surfaces. The hook is plain POSIX shell on the Unix
